@@ -2,6 +2,7 @@ import requests
 import logging
 import time as t
 import pdb as p
+from dotenv import load_dotenv
 
 # Setup Logging
 logging.basicConfig(
@@ -14,17 +15,20 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-# Redfish API details
-IDRAC_HOST = ''
-USERNAME = ''
-PASSWORD = ''
+# Load environment variables from a .env file
+load_dotenv()
 
-# Plex API details
-PLEX_URL = ""
-PLEX_TOKEN = ""
+# Redfish API details from .env
+IDRAC_USER = os.getenv("IDRAC_USER")
+IDRAC_PASS = os.getenv("IDRAC_PASS")
+IDRAC_HOST = os.getenv("IDRAC_HOST")
+
+# PLEX API details from .env
+PLEX_API_URL = os.getenv("PLEX_API_URL")
+PLEX_API_TOKEN = os.getenv("PLEX_API_TOKEN")
 
 # Settings
-MONITOR_DURATION = 10  # Duration in seconds to monitor Plex traffic
+MONITOR_DURATION = 30  # Duration in seconds to monitor Plex traffic
 
 
 # Function to get Plex session data with retries
@@ -38,7 +42,7 @@ def get_plex_sessions_with_retries(retries=3, delay=5):
 
 # Function to retrieve Plex session data
 def get_plex_sessions():
-    url = f"{PLEX_URL}?X-Plex-Token={PLEX_TOKEN}"
+    url = f"{PLEX_API_URL}?X-Plex-Token={PLEX_API_TOKEN}"
     try:
         response = requests.get(url)
         if response.status_code == 200:
@@ -69,7 +73,7 @@ def power_off_server(retries=3, delay=5):
     
     for attempt in range(retries):
         try:
-            response = requests.post(url, json=payload, auth=(USERNAME, PASSWORD), verify=False)
+            response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
             if response.status_code == 200:
                 print("Server powered off successfully.")
                 logging.info("Server powered off successfully.")
@@ -91,7 +95,7 @@ def power_off_server(retries=3, delay=5):
 def is_server_on():
     url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/"
     try:
-        response = requests.get(url, auth=(USERNAME, PASSWORD), verify=False)
+        response = requests.get(url, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
         if response.status_code == 200:
             power_state = response.json().get("PowerState", "Unknown")
             return power_state == "On"
