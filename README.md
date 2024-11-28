@@ -64,6 +64,8 @@ This repository contains a set of custom scripts designed to streamline and auto
 - **logging**
 - **dotenv**
 - **pdb**
+- **responses**
+- **coverage**
 
 
 ## Installation

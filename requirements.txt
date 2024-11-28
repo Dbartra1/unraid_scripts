@@ -4,3 +4,5 @@ time
 logging
 dotenv
 pdb
+responses
+coverage
