@@ -6,7 +6,7 @@ import logging
 
 # Setup Logging
 logging.basicConfig(
-    filename='/path/to/your/logfile.log',
+    filename='C:\Users\dfbar\Documents\repos\github\unraid_scripts\logs', # This will need to change if put into a docker container/cloned to another machine for testing
     level=logging.DEBUG,
     format='{asctime} - {levelname} - {message}',
     style='{',
@@ -14,8 +14,8 @@ logging.basicConfig(
 )
 
 # Redfish API details
-IDRAC_HOST = 'https://192.168.0.40'
-USERNAME = 'root'
+IDRAC_HOST = 'https://192.168.0.40' # IDRAC IP from Dell
+USERNAME = 'root'                   # Plaintexting for now, need to do something more secure eventually 
 PASSWORD = 'yourpasswordhere'
 
 # Directories to compare and sync

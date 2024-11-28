@@ -15,13 +15,13 @@ logging.basicConfig(
 )
 
 # Redfish API details
-IDRAC_HOST = 'https://192.168.0.40'
-USERNAME = 'root'
-PASSWORD = 'Db146823790!'
+IDRAC_HOST = ''
+USERNAME = ''
+PASSWORD = ''
 
 # Plex API details
-PLEX_URL = "http://192.168.0.56:32400/status/sessions"
-PLEX_TOKEN = "rtTYHDTDbHEhBcPbz7s5"
+PLEX_URL = ""
+PLEX_TOKEN = ""
 
 # Function to power on the server
 def power_on_server():
