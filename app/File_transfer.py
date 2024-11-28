@@ -16,7 +16,7 @@ logging.basicConfig(
 # Redfish API details
 IDRAC_HOST = 'https://192.168.0.40'
 USERNAME = 'root'
-PASSWORD = 'yourpassword'
+PASSWORD = 'yourpasswordhere'
 
 # Directories to compare and sync
 HP_DIRECTORY = '/mnt/user/your_hp_directory'
