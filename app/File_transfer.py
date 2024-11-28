@@ -14,13 +14,13 @@ logging.basicConfig(
 )
 
 # Redfish API details
-IDRAC_HOST = 'https://192.168.0.40' # IDRAC IP from Dell
-USERNAME = 'root'                   # Plaintexting for now, need to do something more secure eventually 
-PASSWORD = 'yourpasswordhere'
+IDRAC_HOST = '' # IDRAC IP from Dell
+USERNAME = ''                   # Plaintexting for now, need to do something more secure eventually 
+PASSWORD = ''
 
 # Directories to compare and sync
-HP_DIRECTORY = '/mnt/user/your_hp_directory'
-DELL_DIRECTORY = '/mnt/user/your_dell_directory'
+HP_DIRECTORY = ''
+DELL_DIRECTORY = ''
 
 # Function to power on the Dell server
 def power_on_server():
