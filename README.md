@@ -24,6 +24,17 @@ This repository contains a set of custom scripts designed to streamline and auto
 - **User Scripts Plugin**: Install this from the Unraid App Store to manage and schedule custom scripts.
 - **Python Environment**: Most scripts are written in python and require a python environment locally to run.
 
+## Python Imports/Dependencies
+
+#### **These are all listed in the requirements.txt file in the repository, these can be mass installed via the CLI or installed when the docker container is built.**
+
+- **requests**
+- **subprocess**
+- **time**
+- **logging**
+- **dotenv**
+- **pdb**
+
 
 ## Installation
 

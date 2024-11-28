@@ -1,0 +1,6 @@
+requests
+subprocess
+time
+logging
+dotenv
+pdb
