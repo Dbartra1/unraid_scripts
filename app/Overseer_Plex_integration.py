@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 load_dotenv()
 
 # Configuration from environment variables
-PLEX_SERVER_URL = os.getenv('PLEX_SERVER_URL')
+PLEX_API_URL = os.getenv('PLEX_API_URL')
 PLEX_API_TOKEN = os.getenv('PLEX_API_TOKEN')
 OVERSEERR_API_URL = os.getenv('OVERSEERR_API_URL')
 OVERSEERR_API_TOKEN = os.getenv('OVERSEERR_API_TOKEN')
@@ -22,7 +22,7 @@ else:
 # Function to get a user's watchlist
 def get_watchlist(user_id):
     response = requests.get(
-        f'{PLEX_SERVER_URL}/library/sections/1/all',
+        f'{PLEX_API_URL}/library/sections/1/all',
         headers={'X-Plex-Token': PLEX_API_TOKEN}
     )
     if response.status_code == 200:
