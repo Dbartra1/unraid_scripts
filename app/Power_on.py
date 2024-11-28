@@ -1,7 +1,9 @@
+import os
 import requests
 import logging
 import pdb as p
 import time as t
+from dotenv import load_dotenv
 
 # Setup Logging
 logging.basicConfig(
@@ -14,21 +16,24 @@ logging.basicConfig(
     level=logging.INFO
 )
 
-# Redfish API details
-IDRAC_HOST = 'https://192.168.0.40'
-USERNAME = 'root'
-PASSWORD = 'Db146823790!'
+## Load environment variables from a .env file
+load_dotenv()
 
-# Plex API details
-PLEX_URL = "http://192.168.0.56:32400/status/sessions"
-PLEX_TOKEN = "rtTYHDTDbHEhBcPbz7s5"
+# Redfish API details from .env
+IDRAC_USER = os.getenv("IDRAC_USER")
+IDRAC_PASS = os.getenv("IDRAC_PASS")
+IDRAC_HOST = os.getenv("IDRAC_HOST")
+
+# PLEX API details from .env
+PLEX_API_URL = os.getenv("PLEX_API_URL")
+PLEX_API_TOKEN = os.getenv("PLEX_API_TOKEN")
 
 # Function to power on the server
 def power_on_server():
     url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
     payload = {"ResetType": "On"}
     try:
-        response = requests.post(url, json=payload, auth=(USERNAME, PASSWORD), verify=False)
+        response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
         t.sleep(320)  # Sleep for 320 seconds after the power-on request (may want to shorten)
         if response.status_code == 200:
             print("Server powered on successfully.")
@@ -49,7 +54,7 @@ def has_active_sessions():
 
 # Function to retrieve Plex session data
 def get_plex_sessions():
-    url = f"{PLEX_URL}?X-Plex-Token={PLEX_TOKEN}"
+    url = f"{PLEX_API_URL}?X-Plex-Token={PLEX_API_TOKEN}"
     response = requests.get(url)
     if response.status_code == 200:
         print("Plex session data retrieved successfully.")
@@ -71,7 +76,7 @@ def get_plex_sessions_with_retries(retries=3, delay=5):
 # Main Execution
 if __name__ == "__main__":
     if has_active_sessions():
-        p.set_trace()  # Optional: Remove for production unless debugging
+        # p.set_trace()  # Optional: Remove for production unless debugging
         print("Plex traffic detected. Attempting to power on the server.")
         logging.info("Plex traffic detected. Attempting to power on the server.")
         power_on_server()

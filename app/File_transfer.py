@@ -3,30 +3,34 @@ import requests
 import subprocess
 import time
 import logging
+from dotenv import load_dotenv
 
 # Setup Logging
 logging.basicConfig(
-    filename='/path/to/your/logfile.log',
+    filename='C:\Users\dfbar\Documents\repos\github\unraid_scripts\logs', # This will need to change if put into a docker container/cloned to another machine for testing
     level=logging.DEBUG,
     format='{asctime} - {levelname} - {message}',
     style='{',
     datefmt='%Y-%m-%d %H:%M'
 )
 
-# Redfish API details
-IDRAC_HOST = 'https://192.168.0.40'
-USERNAME = 'root'
-PASSWORD = 'yourpassword'
+# Load environment variables from a .env file
+load_dotenv()
+
+# Redfish API details from .env
+IDRAC_USER = os.getenv("IDRAC_USER")
+IDRAC_PASS = os.getenv("IDRAC_PASS")
+IDRAC_HOST = os.getenv("IDRAC_HOST")
 
 # Directories to compare and sync
-HP_DIRECTORY = '/mnt/user/your_hp_directory'
-DELL_DIRECTORY = '/mnt/user/your_dell_directory'
+DIRECTORY_1 = os.getenv("DIRECTORY_1")
+DIRECTORY_2 = os.getenv("DIRECTORY_2")
 
 # Function to power on the Dell server
 def power_on_server():
     url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
     payload = {"ResetType": "On"}
-    response = requests.post(url, json=payload, auth=(USERNAME, PASSWORD), verify=False)
+    response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
     if response.status_code == 200:
         logging.debug("Dell server powered on successfully.")
     else:
@@ -36,7 +40,7 @@ def power_on_server():
 def power_off_server():
     url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
     payload = {"ResetType": "ForceOff"}
-    response = requests.post(url, json=payload, auth=(USERNAME, PASSWORD), verify=False)
+    response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
     if response.status_code == 200:
         logging.debug("Dell server powered off successfully.")
     else:
@@ -45,8 +49,8 @@ def power_off_server():
 # Function to compare directories on HP and Dell
 def compare_directories():
     # List all files in both directories
-    hp_files = set(os.listdir(HP_DIRECTORY))
-    dell_files = set(os.listdir(DELL_DIRECTORY))
+    hp_files = set(os.listdir(DIRECTORY_1))
+    dell_files = set(os.listdir(DIRECTORY_2))
 
     # Compare the files and return files missing on Dell
     missing_files = hp_files - dell_files
@@ -56,8 +60,8 @@ def compare_directories():
 # Function to transfer missing files from HP to Dell
 def transfer_files(missing_files):
     for file in missing_files:
-        src_file = os.path.join(HP_DIRECTORY, file)
-        dest_file = os.path.join(DELL_DIRECTORY, file)
+        src_file = os.path.join(DIRECTORY_1, file)
+        dest_file = os.path.join(DIRECTORY_2, file)
         
         # Use rsync or scp to transfer files
         # Using rsync for efficiency and resumability
