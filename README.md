@@ -86,7 +86,7 @@ This repository contains a set of custom scripts designed to streamline and auto
 - **Running Scripts**: Scripts can be executed manually or scheduled using the cron functionality in the User Scripts plugin.
 - **Customization**: Modify script parameters located in the .env file to suit your specific Unraid setup.
 
-## Dependencies
+## Other Dependencies
 
 - **Unraid Tools**: Certain scripts may rely on pre-installed Unraid utilities.
 - **Optional Tools**: For specific functionality, additional tools or Docker containers may be required. Check individual scripts for more details.
