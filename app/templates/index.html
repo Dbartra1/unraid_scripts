@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Script Manager</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            background-color: #0f111a;
+            color: #c5c8e6;
+        }
+        header {
+            background-color: #1f2335;
+            color: #80d4ff;
+            padding: 1em;
+            text-align: center;
+        }
+        main {
+            padding: 2em;
+        }
+        .script-section {
+            margin-bottom: 2em;
+            padding: 1em;
+            background: #1a1e2e;
+            border: 1px solid #3f475f;
+            border-radius: 5px;
+        }
+        .script-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1em;
+        }
+        .script-header h2 {
+            margin: 0;
+            color: #80d4ff;
+        }
+        .script-toggle {
+            display: flex;
+            align-items: center;
+        }
+        .script-toggle input {
+            margin-right: 0.5em;
+        }
+        button {
+            background-color: #009688;
+            color: white;
+            border: none;
+            padding: 0.5em 1em;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #00695c;
+        }
+        .output {
+            background: #121420;
+            padding: 1em;
+            margin-top: 1em;
+            border-radius: 5px;
+            border: 1px solid #3f475f;
+            color: #a1eafb;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+        }
+        .cron {
+            margin-top: 1em;
+            display: flex;
+            flex-direction: column;
+        }
+        .cron label {
+            margin-bottom: 0.5em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Python Script Manager</h1>
+    </header>
+    <main>
+        <div class="script-section">
+            <div class="script-header">
+                <h2>Script 1: Example Script</h2>
+                <div class="script-toggle">
+                    <input type="radio" name="script1" id="script1-on" value="on">
+                    <label for="script1-on" title="Enable Script 1">On</label>
+                    <input type="radio" name="script1" id="script1-off" value="off" checked>
+                    <label for="script1-off" title="Disable Script 1">Off</label>
+                </div>
+            </div>
+            <button onclick="runScript('Script 1')">Run Script</button>
+            <div class="cron">
+                <label for="cron-time-script1">Schedule (Cron Time):</label>
+                <input type="text" id="cron-time-script1" placeholder="e.g., 0 5 * * *">
+                <input type="checkbox" id="cron-toggle-script1"> Enable Cron Job
+            </div>
+            <div class="output" id="output-script1">
+                Output will appear here...
+            </div>
+        </div>
+
+        <div class="script-section">
+            <div class="script-header">
+                <h2>Script 2: Another Example</h2>
+                <div class="script-toggle">
+                    <input type="radio" name="script2" id="script2-on" value="on">
+                    <label for="script2-on" title="Enable Script 2">On</label>
+                    <input type="radio" name="script2" id="script2-off" value="off" checked>
+                    <label for="script2-off" title="Disable Script 2">Off</label>
+                </div>
+            </div>
+            <button onclick="runScript('Script 2')">Run Script</button>
+            <div class="cron">
+                <label for="cron-time-script2">Schedule (Cron Time):</label>
+                <input type="text" id="cron-time-script2" placeholder="e.g., 0 5 * * *">
+                <input type="checkbox" id="cron-toggle-script2"> Enable Cron Job
+            </div>
+            <div class="output" id="output-script2">
+                Output will appear here...
+            </div>
+        </div>
+
+        <!-- Placeholder for adding more scripts -->
+        <div class="script-section">
+            <p><strong>Note:</strong> Add more scripts by copying and editing this section.</p>
+        </div>
+    </main>
+    <script>
+        function runScript(scriptName) {
+            const outputDiv = document.getElementById(`output-${scriptName.toLowerCase().replace(/ /g, '-')}`);
+            outputDiv.textContent = `Running ${scriptName}...\n`;
+            setTimeout(() => {
+                outputDiv.textContent += `${scriptName} completed successfully!`;
+            }, 2000); // Simulate script execution
+        }
+    </script>
+</body>
+</html>
