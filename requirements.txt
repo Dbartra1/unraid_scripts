@@ -6,3 +6,4 @@ dotenv
 pdb
 responses
 coverage
+flask
