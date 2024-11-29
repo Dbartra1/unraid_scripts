@@ -4,8 +4,8 @@ This repository contains a set of custom scripts designed to streamline and auto
 
 ## Project Documentation
 
-- [Setup Guide](docs/INSTALL.md)
-- [Advanced Configuration](docs/DEFINITIONS.md)
+- [Install Guide](docs/INSTALL.md)
+- [Project Definitions](docs/DEFINITIONS.md)
 
 
 ## Project Structure
