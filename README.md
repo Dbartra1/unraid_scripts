@@ -41,12 +41,18 @@ This repository contains a set of custom scripts designed to streamline and auto
 **9. Overseerr API**
 - **Definition**: The Overseerr API is an application programming interface that allows developers to interact programmatically with the Overseerr app. It provides endpoints for managing media requests, handling user interactions, and automating request processing. This API enables integration with media servers and other applications for seamless media management.
 
+**10. Flask**
+- **Definition**: Flask is a lightweight, open-source web framework for Python. It is designed for building web applications and APIs with simplicity and flexibility, offering features like URL routing, request handling, and templating. Flask's modular design allows developers to choose extensions and tools suited to their application's needs, making it a popular choice for both small and large projects.
+
+
+
 ## Features
 
 - Automation of power state based on activity on a plex account.
 - Easy integration with Unraid's User Scripts plugin.
 - Modular scripts that address various system requirements.
 - Easy file syncing between two servers on network.
+- Lite Web UI via the Flask API
 
 ## Prerequisites
 
@@ -66,6 +72,7 @@ This repository contains a set of custom scripts designed to streamline and auto
 - **pdb**
 - **responses**
 - **coverage**
+- **flask**
 
 
 ## Installation
