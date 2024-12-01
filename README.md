@@ -5,6 +5,7 @@ This repository contains a set of custom scripts designed to streamline and auto
 ## Project Documentation
 
 - [Install Guide](docs/INSTALL.md)
+- [API Testing](docs/TESTING.md)
 - [Project Definitions](docs/DEFINITIONS.md)
 
 
