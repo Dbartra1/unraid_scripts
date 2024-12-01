@@ -5,7 +5,7 @@ from app import main as ft
 from Power_off import main as poff
 from Power_on import main as pon
 from Stall_handler import main as stall
-from Overseer_Plex_integration import main as opi
+from app.Overseer_Plex_watchlist import main as opw
 
 # Load the environment variables from the .env file
 load_dotenv()
@@ -56,7 +56,7 @@ def stall_handler():
 @app.route("/api/overseer_Plex_integration", methods=["POST"])
 def overseer_Plex_integration():
     try:
-        opi()
+        opw()
         return jsonify({"message": "Grabbed Plex watchlists and added requests to overseer."}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
