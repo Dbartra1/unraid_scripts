@@ -36,7 +36,7 @@
 							}
 						],
 						"url": {
-							"raw": "https://192.168.0.40/redfish/v1",
+							"raw": "https://<your server IP and Port number>/redfish/v1",
 							"protocol": "https",
 							"host": [
 								"192",
@@ -79,7 +79,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://192.168.0.55:5055/api/v1/status",
+							"raw": "http://<your server IP and Port number>/api/v1/status",
 							"protocol": "http",
 							"host": [
 								"192",
@@ -118,7 +118,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://192.168.0.55:5055/api/v1/request",
+							"raw": "http://<your server IP and Port number>/api/v1/request",
 							"protocol": "http",
 							"host": [
 								"192",
@@ -154,7 +154,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://192.168.0.55:5055/api/v1/auth/plex",
+							"raw": "http://<your server IP and Port number>/api/v1/auth/plex",
 							"protocol": "http",
 							"host": [
 								"192",
