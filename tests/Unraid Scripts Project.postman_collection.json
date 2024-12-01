@@ -65,7 +65,7 @@
 							"bearer": [
 								{
 									"key": "token",
-									"value": "MTcyNDMwMjA4MzU1NjhkZDQ0NzY0LTk4N2QtNDgwZS04MjI0LTEzYzE1MjIzM2M3Yg==",
+									"value": "",
 									"type": "string"
 								}
 							]
@@ -74,7 +74,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer MTcyNDMwMjA4MzU1NjhkZDQ0NzY0LTk4N2QtNDgwZS04MjI0LTEzYzE1MjIzM2M3Yg==",
+								"value": "Bearer ",
 								"type": "text"
 							}
 						],
