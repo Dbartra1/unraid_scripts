@@ -146,7 +146,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"authToken\": \"rtTYHDTDbHEhBcPbz7s5\"\r\n}",
+							"raw": "{\r\n    \"authToken\": \"\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
