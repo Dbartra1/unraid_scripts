@@ -31,7 +31,7 @@ def power_on_server():
     url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
     payload = {"ResetType": "On"}
     response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
-    if response.status_code == 200:
+    if response.status_code == 204:
         logging.debug("Dell server powered on successfully.")
     else:
         logging.error(f"Failed to power on Dell server: {response.status_code}, {response.text}")
@@ -41,7 +41,7 @@ def power_off_server():
     url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
     payload = {"ResetType": "ForceOff"}
     response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
-    if response.status_code == 200:
+    if response.status_code == 204:
         logging.debug("Dell server powered off successfully.")
     else:
         logging.error(f"Failed to power off Dell server: {response.status_code}, {response.text}")
