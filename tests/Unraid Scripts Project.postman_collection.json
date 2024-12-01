@@ -22,7 +22,7 @@
 								},
 								{
 									"key": "username",
-									"value": "root",
+									"value": "",
 									"type": "string"
 								}
 							]
@@ -31,7 +31,7 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": " Basic <Base64-Encoded-Credentials>",
+								"value": "",
 								"type": "text"
 							}
 						],
