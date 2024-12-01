@@ -5,22 +5,43 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# Redfish API details from .env
+IDRAC_USER = os.getenv("IDRAC_USER")
+IDRAC_PASS = os.getenv("IDRAC_PASS")
+IDRAC_HOST = os.getenv("IDRAC_HOST")
+
+# Plex API details from .env
+PLEX_API_URL = os.getenv('PLEX_API_URL')
+PLEX_API_TOKEN = os.getenv('PLEX_API_TOKEN')
+
+# Overseer API details from .env
+OVERSEERR_API_URL = os.getenv('OVERSEERR_API_URL')
+OVERSEERR_API_TOKEN = os.getenv('OVERSEERR_API_TOKEN')
+
+# Radarr API details from .env
+RADARR_API_URL=http://localhost:7878
+RADARR_API_KEY=your_radarr_api_key
+
+# Sonarr API details from .env
+SONARR_API_URL=http://localhost:8989
+SONARR_API_KEY=your_sonarr_api_key
+
 # API Endpoints and credentials from .env
 API_ENDPOINTS = {
     "plex": {
-        "url": os.getenv("PLEX_URL", "http://localhost:32400/status"),
-        "token": os.getenv("PLEX_TOKEN")
+        "url": os.getenv("PLEX_API_URL", "http://localhost:32400/status"),
+        "token": os.getenv("PLEX_API_TOKEN")
     },
     "overseer": {
-        "url": os.getenv("OVERSEER_URL", "http://localhost:5055/api/v1/status"),
+        "url": os.getenv("OVERSEER_API_URL", "http://localhost:5055/api/v1/status"),
         "token": os.getenv("OVERSEER_TOKEN")
     },
     "sonarr": {
-        "url": os.getenv("SONARR_URL", "http://localhost:8989/api/system/status"),
+        "url": os.getenv("SONARR_API_URL", "http://localhost:8989/api/system/status"),
         "token": os.getenv("SONARR_API_KEY")
     },
     "radarr": {
-        "url": os.getenv("RADARR_URL", "http://localhost:7878/api/system/status"),
+        "url": os.getenv("RADARR_API_URL", "http://localhost:7878/api/system/status"),
         "token": os.getenv("RADARR_API_KEY")
     },
     "redfish": {
