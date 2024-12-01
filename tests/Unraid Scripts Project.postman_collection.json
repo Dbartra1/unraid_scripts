@@ -1,0 +1,191 @@
+{
+	"info": {
+		"_postman_id": "ace1bdfe-d03a-4a35-a667-4dc918512214",
+		"name": "Unraid Scripts Project",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40116839"
+	},
+	"item": [
+		{
+			"name": "Redfish",
+			"item": [
+				{
+					"name": "Service Root",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "Db146823790!",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "root",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": " Basic <Base64-Encoded-Credentials>",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "https://192.168.0.40/redfish/v1",
+							"protocol": "https",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"40"
+							],
+							"path": [
+								"redfish",
+								"v1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Overseer",
+			"item": [
+				{
+					"name": "Version",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "MTcyNDMwMjA4MzU1NjhkZDQ0NzY0LTk4N2QtNDgwZS04MjI0LTEzYzE1MjIzM2M3Yg==",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer MTcyNDMwMjA4MzU1NjhkZDQ0NzY0LTk4N2QtNDgwZS04MjI0LTEzYzE1MjIzM2M3Yg==",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://192.168.0.55:5055/api/v1/status",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"55"
+							],
+							"port": "5055",
+							"path": [
+								"api",
+								"v1",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Requests",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"authToken\": \"rtTYHDTDbHEhBcPbz7s5\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://192.168.0.55:5055/api/v1/request",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"55"
+							],
+							"port": "5055",
+							"path": [
+								"api",
+								"v1",
+								"request"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get cookie.sid",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"authToken\": \"rtTYHDTDbHEhBcPbz7s5\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://192.168.0.55:5055/api/v1/auth/plex",
+							"protocol": "http",
+							"host": [
+								"192",
+								"168",
+								"0",
+								"55"
+							],
+							"port": "5055",
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"plex"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Plex",
+			"item": []
+		},
+		{
+			"name": "Radarr",
+			"item": []
+		},
+		{
+			"name": "Sonarr",
+			"item": []
+		}
+	]
+}
