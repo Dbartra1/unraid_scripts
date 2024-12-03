@@ -7,3 +7,4 @@ pdb
 responses
 coverage
 flask
+tqdm

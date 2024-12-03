@@ -3,6 +3,7 @@ import requests
 import subprocess
 import time
 import logging
+from tqdm import tqdm
 from dotenv import load_dotenv
 
 # Setup Logging
@@ -74,6 +75,28 @@ def transfer_files(missing_files):
             logging.debug(f"Successfully transferred {file}.")
         else:
             logging.error(f"Failed to transfer {file}: {result.stderr.decode()}")
+
+# This is the same function as above, just with a loading bar because it is a large operation that can take hours
+def transfer_files(missing_files):
+    with tqdm(total=len(missing_files), desc="Transferring Files", unit="file") as pbar:
+        for file in missing_files:
+            src_file = os.path.join(DIRECTORY_1, file)
+            dest_file = os.path.join(DIRECTORY_2, file)
+            
+            # Use rsync for efficient file transfer
+            command = f"rsync -avz {src_file} user@dell_ip:{dest_file}"
+            logging.debug(f"Transferring file: {src_file} to {dest_file}")
+            
+            result = subprocess.run(command, shell=True, capture_output=True)
+            
+            if result.returncode == 0:
+                logging.debug(f"Successfully transferred {file}.")
+            else:
+                logging.error(f"Failed to transfer {file}: {result.stderr.decode()}")
+            
+            # Update the progress bar
+            pbar.update(1)
+
 
 # Main logic
 def main():
