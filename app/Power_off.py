@@ -25,7 +25,7 @@ LOG_PATH = os.getenv("LOG_PATH")
 MONITOR_DURATION = 30  # Duration in seconds to monitor Plex traffic
 
 logging.basicConfig(
-    filename=f"{LOG_PATH}/file_transfer_log_{t.strftime('%Y-%m-%d_%H-%M-%S')}.log",  # Formatted with current time
+    filename=f"{LOG_PATH}/power_off_log_{t.strftime('%Y-%m-%d_%H-%M-%S')}.log",  # Formatted with current time
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',  # Correct format string
     datefmt='%Y-%m-%d %H:%M:%S'  # Time format for the log timestamps
