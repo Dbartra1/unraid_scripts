@@ -17,8 +17,6 @@ PORT_NUMBER_FLASK = int(os.getenv('PORT_NUMBER_FLASK', 5000))  # Default to port
 
 app = Flask(__name__)
 
-
-
 @app.route("/")
 def home():
     return render_template("index.html")

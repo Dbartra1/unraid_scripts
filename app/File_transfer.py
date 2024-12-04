@@ -1,4 +1,5 @@
 import os
+import time
 import requests
 import time
 import logging
@@ -6,15 +7,6 @@ import filecmp
 import shutil
 from tqdm import tqdm
 from dotenv import load_dotenv
-
-# Setup Logging
-logging.basicConfig(
-    filename='C:\Users\dfbar\Documents\repos\github\unraid_scripts\logs', # This will need to change if put into a docker container/cloned to another machine for testing
-    level=logging.DEBUG,
-    format='{asctime} - {levelname} - {message}',
-    style='{',
-    datefmt='%Y-%m-%d %H:%M'
-)
 
 # Load environment variables from a .env file
 load_dotenv()
@@ -27,6 +19,17 @@ IDRAC_HOST = os.getenv("IDRAC_HOST")
 # Directories to compare and sync
 DIRECTORY_1 = os.getenv("DIRECTORY_1")
 DIRECTORY_2 = os.getenv("DIRECTORY_2")
+
+# File path for logs
+LOG_PATH = os.getenv("LOG_PATH")
+
+# Setup Logging
+logging.basicConfig(
+    filename=f"{LOG_PATH}/file_transfer_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log",  # Formatted with current time
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Correct format string
+    datefmt='%Y-%m-%d %H:%M:%S'  # Time format for the log timestamps
+)
 
 # Function to power on the Dell server
 def power_on_server():
@@ -63,7 +66,6 @@ def power_off_server():
         logging.error(f"Failed to power off Dell server: {response.status_code}, {response.text}")
 
 
-# Function to sync the two directories 
 def sync_directories():
     """
     Synchronize contents of two directories. Copies missing or updated files from src_dir to dest_dir.
@@ -71,6 +73,8 @@ def sync_directories():
     if not os.path.exists(DIRECTORY_2):
         logging.info(f"Destination directory {DIRECTORY_2} does not exist. Creating it.")
         os.makedirs(DIRECTORY_2)
+
+    files_copied = False  # Flag to track if any file is copied
 
     try:
         # Get the list of files in both directories
@@ -83,7 +87,7 @@ def sync_directories():
                 logging.debug(f"Creating directory: {dest_subdir}")
                 os.makedirs(dest_subdir)
 
-            # Compare files in current directory
+            # Compare files in the current directory
             for file_name in tqdm(files, desc=f"Syncing {rel_path}", unit="file"):
                 src_file = os.path.join(root, file_name)
                 dest_file = os.path.join(dest_subdir, file_name)
@@ -91,10 +95,16 @@ def sync_directories():
                 if not os.path.exists(dest_file) or not filecmp.cmp(src_file, dest_file, shallow=False):
                     logging.info(f"Copying {src_file} to {dest_file}")
                     shutil.copy2(src_file, dest_file)
+                    files_copied = True  # Set flag to True when a file is copied
 
-        logging.info("Directory synchronization complete.")
+        if not files_copied:
+            logging.info("No differences found between the directories. No files were copied.")
+        else:
+            logging.info("Directory synchronization complete.")
+
     except Exception as e:
         logging.error(f"An error occurred: {e}")
+
 
 """ # This is a function that is the same as the sync function above, but adds a delete to the source directory if there is no differences in the two directories. This assumes there was a successful sync. 
 def sync_directories_delete():
@@ -161,3 +171,6 @@ def main():
 # Run the script
 if __name__ == "__main__":
     main()
+
+
+## Notes: I think that this should be run weekly as it can be a big operation depending on the amount of files to move. This can be run more frequently, but it will just return a 
