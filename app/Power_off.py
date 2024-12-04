@@ -111,9 +111,6 @@ def is_server_on():
 
 # Main execution
 if __name__ == "__main__":
-    # Debugging (remove or comment out if not needed)
-    # p.set_trace()
-
     if has_active_sessions():
         print("Plex traffic detected. No action required.")
         logging.info("Plex traffic detected. No action required.")

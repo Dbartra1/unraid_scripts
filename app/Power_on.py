@@ -74,7 +74,6 @@ def get_plex_sessions_with_retries(retries=3, delay=5):
 # Main Execution
 if __name__ == "__main__":
     if has_active_sessions():
-        # p.set_trace()  # Optional: Remove for production unless debugging
         print("Plex traffic detected. Attempting to power on the server.")
         logging.info("Plex traffic detected. Attempting to power on the server.")
         power_on_server()
