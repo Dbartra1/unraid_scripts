@@ -1,20 +1,8 @@
 import os
 import requests
 import logging
-import pdb as p
 import time as t
 from dotenv import load_dotenv
-
-# Setup Logging
-logging.basicConfig(
-    filename="poweron_log.log",
-    encoding="utf-8",
-    filemode="a",
-    format="{asctime} - {levelname} - {message}",
-    style="{",
-    datefmt="%Y-%m-%d %H:%M",
-    level=logging.INFO
-)
 
 ## Load environment variables from a .env file
 load_dotenv()
@@ -27,6 +15,16 @@ IDRAC_HOST = os.getenv("IDRAC_HOST")
 # PLEX API details from .env
 PLEX_API_URL = os.getenv("PLEX_API_URL")
 PLEX_API_TOKEN = os.getenv("PLEX_API_TOKEN")
+
+# File path for logs
+LOG_PATH = os.getenv("LOG_PATH")
+
+logging.basicConfig(
+    filename=f"{LOG_PATH}/file_transfer_log_{t.strftime('%Y-%m-%d_%H-%M-%S')}.log",  # Formatted with current time
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Correct format string
+    datefmt='%Y-%m-%d %H:%M:%S'  # Time format for the log timestamps
+)
 
 # Function to power on the server
 def power_on_server():
