@@ -1,6 +1,5 @@
 import os
 import requests
-import subprocess
 import time
 import logging
 from tqdm import tqdm
@@ -31,11 +30,25 @@ DIRECTORY_2 = os.getenv("DIRECTORY_2")
 def power_on_server():
     url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
     payload = {"ResetType": "On"}
-    response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
-    if response.status_code == 204:
-        logging.debug("Dell server powered on successfully.")
-    else:
-        logging.error(f"Failed to power on Dell server: {response.status_code}, {response.text}")
+    
+    while True:
+        try:
+            response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
+            
+            if response.status_code == 204:
+                logging.debug("Power-on command sent successfully.")
+            elif response.status_code == 409:
+                logging.debug("Server is already powered on.")
+                break
+            else:
+                logging.warning(f"Unexpected response: {response.status_code}, {response.text}")
+            
+            # Wait for a short duration before sending the next request
+            time.sleep(5)
+        except requests.RequestException as e:
+            logging.error(f"Error while sending power-on request: {e}")
+            time.sleep(5)  # Retry after a delay
+
 
 # Function to power off the Dell server
 def power_off_server():
@@ -47,55 +60,39 @@ def power_off_server():
     else:
         logging.error(f"Failed to power off Dell server: {response.status_code}, {response.text}")
 
-# Function to compare directories on HP and Dell
-def compare_directories():
-    # List all files in both directories
-    hp_files = set(os.listdir(DIRECTORY_1))
-    dell_files = set(os.listdir(DIRECTORY_2))
 
-    # Compare the files and return files missing on Dell
-    missing_files = hp_files - dell_files
-    logging.debug(f"Files missing on Dell: {missing_files}")
-    return missing_files
+# Function to sync the two directories 
+def sync_directories():
+    """
+    Synchronize contents of two directories. Copies missing or updated files from src_dir to dest_dir.
+    """
+    if not os.path.exists(DIRECTORY_2):
+        logging.info(f"Destination directory {DIRECTORY_2} does not exist. Creating it.")
+        os.makedirs(DIRECTORY_2)
 
-# Function to transfer missing files from HP to Dell
-def transfer_files(missing_files):
-    for file in missing_files:
-        src_file = os.path.join(DIRECTORY_1, file)
-        dest_file = os.path.join(DIRECTORY_2, file)
-        
-        # Use rsync or scp to transfer files
-        # Using rsync for efficiency and resumability
-        command = f"rsync -avz {src_file} user@dell_ip:{dest_file}"
-        logging.debug(f"Transferring file: {src_file} to {dest_file}")
-        
-        result = subprocess.run(command, shell=True, capture_output=True)
-        
-        if result.returncode == 0:
-            logging.debug(f"Successfully transferred {file}.")
-        else:
-            logging.error(f"Failed to transfer {file}: {result.stderr.decode()}")
+    try:
+        # Get the list of files in both directories
+        for root, _, files in os.walk(DIRECTORY_1):
+            # Relative path from source directory
+            rel_path = os.path.relpath(root, DIRECTORY_1)
+            dest_subdir = os.path.join(DIRECTORY_2, rel_path)
 
-# This is the same function as above, just with a loading bar because it is a large operation that can take hours
-def transfer_files(missing_files):
-    with tqdm(total=len(missing_files), desc="Transferring Files", unit="file") as pbar:
-        for file in missing_files:
-            src_file = os.path.join(DIRECTORY_1, file)
-            dest_file = os.path.join(DIRECTORY_2, file)
-            
-            # Use rsync for efficient file transfer
-            command = f"rsync -avz {src_file} user@dell_ip:{dest_file}"
-            logging.debug(f"Transferring file: {src_file} to {dest_file}")
-            
-            result = subprocess.run(command, shell=True, capture_output=True)
-            
-            if result.returncode == 0:
-                logging.debug(f"Successfully transferred {file}.")
-            else:
-                logging.error(f"Failed to transfer {file}: {result.stderr.decode()}")
-            
-            # Update the progress bar
-            pbar.update(1)
+            if not os.path.exists(dest_subdir):
+                logging.debug(f"Creating directory: {dest_subdir}")
+                os.makedirs(dest_subdir)
+
+            # Compare files in current directory
+            for file_name in tqdm(files, desc=f"Syncing {rel_path}", unit="file"):
+                src_file = os.path.join(root, file_name)
+                dest_file = os.path.join(dest_subdir, file_name)
+
+                if not os.path.exists(dest_file) or not filecmp.cmp(src_file, dest_file, shallow=False):
+                    logging.info(f"Copying {src_file} to {dest_file}")
+                    shutil.copy2(src_file, dest_file)
+
+        logging.info("Directory synchronization complete.")
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
 
 
 # Main logic
@@ -107,16 +104,7 @@ def main():
     # Wait for Dell to fully power on before proceeding
     time.sleep(360)  # Adjust based on your server's boot time
     
-    # Compare directories and identify missing files
-    logging.debug("Comparing directories on HP and Dell...")
-    missing_files = compare_directories()
-    
-    if missing_files:
-        # Step 3: Transfer missing files to Dell
-        logging.debug("Missing files detected, transferring...")
-        transfer_files(missing_files)
-    else:
-        logging.debug("No missing files found. Nothing to transfer.")
+    sync_directories()
     
     # Step 4: Shut down the Dell server gracefully
     logging.debug("Transfer complete, powering off Dell server.")
