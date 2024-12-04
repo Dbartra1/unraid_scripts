@@ -19,12 +19,12 @@ OVERSEERR_API_URL = os.getenv('OVERSEERR_API_URL')
 OVERSEERR_API_TOKEN = os.getenv('OVERSEERR_API_TOKEN')
 
 # Radarr API details from .env
-RADARR_API_URL=http://localhost:7878
-RADARR_API_KEY=your_radarr_api_key
+RADARR_API_URL= os.getenv('RADARR_API_URL')
+RADARR_API_KEY= os.getenv('RADARR_API_KEY')
 
 # Sonarr API details from .env
-SONARR_API_URL=http://localhost:8989
-SONARR_API_KEY=your_sonarr_api_key
+SONARR_API_URL= os.getenv('SONARR_API_URL')
+SONARR_API_KEY= os.getenv('SONARR_API_KEY')
 
 # API Endpoints and credentials from .env
 API_ENDPOINTS = {

@@ -1,6 +1,7 @@
 import os
+import subprocess
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 from app import main as ft
 from Power_off import main as poff
 from Power_on import main as pon
