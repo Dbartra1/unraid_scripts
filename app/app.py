@@ -16,9 +16,40 @@ PORT_NUMBER_FLASK = int(os.getenv('PORT_NUMBER_FLASK', 5000))  # Default to port
 
 app = Flask(__name__)
 
+
+
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route('/run-script', methods=['POST'])
+def run_script():
+    script_name = request.json.get('script_name')
+    if not script_name:
+        return jsonify({"error": "No script name provided"}), 400
+    
+    try:
+        # Make sure to set the correct path to your scripts folder
+        scripts_folder = "./scripts"
+        script_path = os.path.join(scripts_folder, f"{script_name}.py")
+        
+        if not os.path.exists(script_path):
+            return jsonify({"error": "Script not found"}), 404
+        
+        # Run the script and capture output
+        result = subprocess.run(
+            ["python", script_path],
+            capture_output=True,
+            text=True
+        )
+        
+        if result.returncode == 0:
+            return jsonify({"output": result.stdout}), 200
+        else:
+            return jsonify({"error": result.stderr}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route("/api/start-transfer", methods=["POST"])
 def start_file_transfer():

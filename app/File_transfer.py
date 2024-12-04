@@ -2,6 +2,8 @@ import os
 import requests
 import time
 import logging
+import filecmp
+import shutil
 from tqdm import tqdm
 from dotenv import load_dotenv
 
@@ -94,21 +96,67 @@ def sync_directories():
     except Exception as e:
         logging.error(f"An error occurred: {e}")
 
+""" # This is a function that is the same as the sync function above, but adds a delete to the source directory if there is no differences in the two directories. This assumes there was a successful sync. 
+def sync_directories_delete():
+    
+    Synchronize contents of two directories. Copies missing or updated files from src_dir to dest_dir.
+    Deletes the source directory if both directories are identical after sync.
+    
+    if not os.path.exists(DIRECTORY_2):
+        logging.info(f"Destination directory {DIRECTORY_2} does not exist. Creating it.")
+        os.makedirs(DIRECTORY_2)
 
-# Main logic
+    try:
+        # Synchronize files
+        directories_identical = True
+        for root, _, files in os.walk(DIRECTORY_1):
+            rel_path = os.path.relpath(root, DIRECTORY_1)
+            dest_subdir = os.path.join(DIRECTORY_2, rel_path)
+
+            if not os.path.exists(dest_subdir):
+                logging.debug(f"Creating directory: {dest_subdir}")
+                os.makedirs(dest_subdir)
+
+            for file_name in tqdm(files, desc=f"Syncing {rel_path}", unit="file"):
+                src_file = os.path.join(root, file_name)
+                dest_file = os.path.join(dest_subdir, file_name)
+
+                if not os.path.exists(dest_file) or not filecmp.cmp(src_file, dest_file, shallow=False):
+                    logging.info(f"Copying {src_file} to {dest_file}")
+                    shutil.copy2(src_file, dest_file)
+                    directories_identical = False  # A difference was found and resolved
+
+        if directories_identical:
+            logging.info("Directories are identical. Deleting the source directory.")
+            shutil.rmtree(DIRECTORY_1)
+        else:
+            logging.info("Directories synchronized, but some files were updated.")
+    except Exception as e:
+        logging.error(f"An error occurred during synchronization: {e}")
+ """
+
 def main():
-    # Step 1: Power on the Dell server
-    logging.debug("Checking Dell server power status...")
-    power_on_server()
-    
-    # Wait for Dell to fully power on before proceeding
-    time.sleep(360)  # Adjust based on your server's boot time
-    
-    sync_directories()
-    
-    # Step 4: Shut down the Dell server gracefully
-    logging.debug("Transfer complete, powering off Dell server.")
-    power_off_server()
+    logging.debug("Starting the script...")
+
+    try:
+        # Step 1: Power on the Dell server
+        logging.debug("Checking Dell server power status...")
+        power_on_server()
+
+        # Step 2: Wait for the server to be ready
+        logging.debug("Waiting for the Dell server to boot...")
+        time.sleep(360)  # Replace this with polling logic if needed
+
+        # Step 3: Synchronize directories
+        logging.debug(f"Starting synchronization: {DIRECTORY_1} -> {DIRECTORY_2}")
+        sync_directories()
+
+        # Step 4: Shut down the Dell server gracefully
+        logging.debug("Synchronization complete. Powering off Dell server.")
+        power_off_server()
+    except Exception as e:
+        logging.error(f"An unexpected error occurred in the main logic: {e}")
+
 
 # Run the script
 if __name__ == "__main__":
