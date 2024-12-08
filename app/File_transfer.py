@@ -2,7 +2,6 @@ import os
 import time
 import requests
 import logging
-import filecmp
 import shutil
 from tqdm import tqdm
 from dotenv import load_dotenv
