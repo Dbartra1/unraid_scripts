@@ -5,8 +5,6 @@ import time as t
 from dotenv import load_dotenv
 
 
-
-# Load environment variables from a .env file
 load_dotenv()
 
 # Redfish API details from .env
@@ -21,7 +19,6 @@ PLEX_API_TOKEN = os.getenv("PLEX_API_TOKEN")
 # File path for logs
 LOG_PATH = os.getenv("LOG_PATH")
 
-# Settings
 MONITOR_DURATION = 30  # Duration in seconds to monitor Plex traffic
 
 logging.basicConfig(
@@ -86,7 +83,6 @@ def power_off_server(retries=3, delay=5):
             print(f"Exception occurred while powering off the server: {e}")
             logging.error(f"Exception occurred while powering off the server: {e}")
         
-        # Retry logic with delay
         t.sleep(delay)
 
     print("Failed to power off the server after multiple attempts.")
@@ -109,7 +105,6 @@ def is_server_on():
         logging.error(f"Exception occurred while checking server state: {e}")
         return False
 
-# Main execution
 if __name__ == "__main__":
     if has_active_sessions():
         print("Plex traffic detected. No action required.")

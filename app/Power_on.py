@@ -4,7 +4,6 @@ import logging
 import time as t
 from dotenv import load_dotenv
 
-## Load environment variables from a .env file
 load_dotenv()
 
 # Redfish API details from .env
@@ -26,7 +25,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'  # Time format for the log timestamps
 )
 
-# Function to power on the server
 def power_on_server():
     url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
     payload = {"ResetType": "On"}
@@ -71,7 +69,6 @@ def get_plex_sessions_with_retries(retries=3, delay=5):
         t.sleep(delay)
     return None
 
-# Main Execution
 if __name__ == "__main__":
     if has_active_sessions():
         print("Plex traffic detected. Attempting to power on the server.")

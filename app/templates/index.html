@@ -9,14 +9,15 @@
             font-family: 'Courier New', Courier, monospace;
             margin: 0;
             padding: 0;
-            background-color: #0f111a;
-            color: #c5c8e6;
+            background-color: #000000;
+            color: #00ff9f;
         }
         header {
-            background-color: #1f2335;
-            color: #80d4ff;
+            background-color: #121420;
+            color: #00b8ff;
             padding: 1em;
             text-align: center;
+            border-bottom: 2px solid #bd00ff;
         }
         main {
             padding: 2em;
@@ -24,55 +25,53 @@
         .script-section {
             margin-bottom: 2em;
             padding: 1em;
-            background: #1a1e2e;
-            border: 1px solid #3f475f;
+            background: #121420;
+            border: 1px solid #bd00ff;
             border-radius: 5px;
         }
         .script-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             margin-bottom: 1em;
         }
         .script-header h2 {
             margin: 0;
-            color: #80d4ff;
+            color: #d600ff;
         }
-        .script-toggle {
+        .script-controls {
             display: flex;
-            align-items: center;
+            flex-wrap: wrap;
+            gap: 1em;
+            margin-bottom: 1em;
         }
-        .script-toggle input {
-            margin-right: 0.5em;
+        .script-controls input[type="text"] {
+            flex: 1;
+            padding: 0.5em;
+            border: 1px solid #3f475f;
+            border-radius: 3px;
+            background-color: #1a1e2e;
+            color: #00b8ff;
         }
         button {
-            background-color: #009688;
-            color: white;
+            background-color: #00ff9f;
+            color: #000000;
             border: none;
             padding: 0.5em 1em;
             border-radius: 3px;
             cursor: pointer;
         }
         button:hover {
-            background-color: #00695c;
+            background-color: #00b8ff;
         }
         .output {
-            background: #121420;
+            background: #000000;
             padding: 1em;
             margin-top: 1em;
             border-radius: 5px;
-            border: 1px solid #3f475f;
-            color: #a1eafb;
+            border: 1px solid #bd00ff;
+            color: #00ff9f;
             font-family: 'Courier New', Courier, monospace;
             white-space: pre-wrap;
-        }
-        .cron {
-            margin-top: 1em;
-            display: flex;
-            flex-direction: column;
-        }
-        .cron label {
-            margin-bottom: 0.5em;
+            height: 150px;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -83,81 +82,173 @@
     <main>
         <div class="script-section">
             <div class="script-header">
-                <h2>Script 1: Example Script</h2>
-                <div class="script-toggle">
-                    <input type="radio" name="script1" id="script1-on" value="on">
-                    <label for="script1-on" title="Enable Script 1">On</label>
-                    <input type="radio" name="script1" id="script1-off" value="off" checked>
-                    <label for="script1-off" title="Disable Script 1">Off</label>
-                </div>
+                <h2>File Sync
+                    <span class="tooltip" title="This script performs example tasks.">❓</span> 
+                </h2>
             </div>
-            <button class="run-script-btn" data-script="start-transfer">Run Script</button>
-            <div class="cron">
-                <label for="cron-time-script1">Schedule (Cron Time):</label>
-                <input type="text" id="cron-time-script1" placeholder="e.g., 0 5 * * *">
-                <input type="checkbox" id="cron-toggle-script1"> Enable Cron Job
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
             </div>
-            <div class="output" id="output-script1">
+            <div class="output">
                 Output will appear here...
             </div>
         </div>
 
         <div class="script-section">
             <div class="script-header">
-                <h2>Script 2: Another Example</h2>
-                <div class="script-toggle">
-                    <input type="radio" name="script2" id="script2-on" value="on">
-                    <label for="script2-on" title="Enable Script 2">On</label>
-                    <input type="radio" name="script2" id="script2-off" value="off" checked>
-                    <label for="script2-off" title="Disable Script 2">Off</label>
-                </div>
+                <h2>API Tests
+                    <span class="tooltip" title="This script performs example tasks.">❓</span>
+                </h2>
             </div>
-            <button class="run-script-btn" data-script="start-transfer">Run Script</button>
-            <div class="cron">
-                <label for="cron-time-script2">Schedule (Cron Time):</label>
-                <input type="text" id="cron-time-script2" placeholder="e.g., 0 5 * * *">
-                <input type="checkbox" id="cron-toggle-script2"> Enable Cron Job
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
             </div>
-            <div class="output" id="output-script2">
+            <div class="output">
                 Output will appear here...
             </div>
         </div>
 
-        <!-- Placeholder for adding more scripts -->
         <div class="script-section">
             <div class="script-header">
-                <h2>Script 2: Another Example</h2>
-                <div class="script-toggle">
-                    <input type="radio" name="script2" id="script2-on" value="on">
-                    <label for="script2-on" title="Enable Script 2">On</label>
-                    <input type="radio" name="script2" id="script2-off" value="off" checked>
-                    <label for="script2-off" title="Disable Script 2">Off</label>
-                </div>
+                <h2>Plex Power On Redfish
+                    <span class="tooltip" title="This script performs example tasks.">❓</span>
+                </h2>
             </div>
-            <button class="run-script-btn" data-script="start-transfer">Run Script</button>
-            <div class="cron">
-                <label for="cron-time-script2">Schedule (Cron Time):</label>
-                <input type="text" id="cron-time-script2" placeholder="e.g., 0 5 * * *">
-                <input type="checkbox" id="cron-toggle-script2"> Enable Cron Job
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
             </div>
-            <div class="output" id="output-script2">
+            <div class="output">
                 Output will appear here...
             </div>
-        </div>        
-    </div>
-    
+        </div>
+
+        <div class="script-section">
+            <div class="script-header">
+                <h2>Plex Power Off Redfish
+                    <span class="tooltip" title="This script performs example tasks.">❓</span>
+                </h2>
+            </div>
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
+            </div>
+            <div class="output">
+                Output will appear here...
+            </div>
+        </div>
+
+        <div class="script-section">
+            <div class="script-header">
+                <h2>WOL Power on/off
+                    <span class="tooltip" title="This script performs example tasks.">❓</span>
+                </h2>
+            </div>
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
+            </div>
+            <div class="output">
+                Output will appear here...
+            </div>
+        </div>
+
+        <div class="script-section">
+            <div class="script-header">
+                <h2>Overseer Watchlist Sync
+                    <span class="tooltip" title="This script performs example tasks.">❓</span>
+                </h2>
+            </div>
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
+            </div>
+            <div class="output">
+                Output will appear here...
+            </div>
+        </div>
+
+        <div class="script-section">
+            <div class="script-header">
+                <h2>Stall Handler
+                    <span class="tooltip" title="This script performs example tasks.">❓</span>
+                </h2>
+            </div>
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
+            </div>
+            <div class="output">
+                Output will appear here...
+            </div>
+        </div>
+
+        <div class="script-section">
+            <div class="script-header">
+                <h2>Data Sanitization
+                    <span class="tooltip" title="This script performs example tasks.">❓</span>
+                </h2>
+            </div>
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
+            </div>
+            <div class="output">
+                Output will appear here...
+            </div>
+        </div>
+
+        <div class="script-section">
+            <div class="script-header">
+                <h2>Log Clear
+                    <span class="tooltip" title="This script performs example tasks.">❓</span>
+                </h2>
+            </div>
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
+            </div>
+            <div class="output">
+                Output will appear here...
+            </div>
+        </div>
+
+        <div class="script-section">
+            <div class="script-header">
+                <h2>Script 10: Additional Example
+                    <span class="tooltip" title="This script performs example tasks.">❓</span>
+                </h2>
+            </div>
+            <div class="script-controls">
+                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
+                <button>Submit Cron</button>
+                <button>Cancel Cron</button>
+                <button>Run Script</button>
+            </div>
+            <div class="output">
+                Output will appear here...
+            </div>
+        </div>
     </main>
-    <script>
-        function runScript(scriptName) {
-            const outputDiv = document.getElementById(`output-${scriptName.toLowerCase().replace(/ /g, '-')}`);
-            outputDiv.textContent = `Running ${scriptName}...\n`;
-            setTimeout(() => {
-                outputDiv.textContent += `${scriptName} completed successfully!`;
-            }, 2000); // Simulate script execution
-        }
-    </script>
-
-    <script src="main.js"></script>
-
 </body>
 </html>

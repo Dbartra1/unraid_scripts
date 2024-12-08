@@ -16,7 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Display loading message
             outputDiv.textContent = "Running script...";
             outputDiv.style.color = "blue";
 

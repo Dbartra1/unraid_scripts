@@ -46,6 +46,8 @@ This repository contains a set of custom scripts designed to streamline and auto
 - **responses**
 - **coverage**
 - **flask**
+- **crontab**
+- **tqdm**
 
 ## Usage
 

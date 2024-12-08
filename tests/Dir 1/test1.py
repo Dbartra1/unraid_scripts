@@ -1,1 +1,0 @@
-# This is a test file for debugging the file_transfer script on windows machine. Will delete later.
