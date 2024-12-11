@@ -5,3 +5,5 @@ coverage
 flask
 tqdm
 crontab
+tarfile
+json

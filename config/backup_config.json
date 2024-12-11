@@ -1,0 +1,18 @@
+{
+    "backup_location": "/mnt/user/backups/appdata",
+    "retention_days": 7,
+    "containers": [
+        {
+            "name": "sonarr",
+            "appdata_path": "/mnt/user/appdata/sonarr"
+        },
+        {
+            "name": "radarr",
+            "appdata_path": "/mnt/user/appdata/radarr"
+        },
+        {
+            "name": "plex",
+            "appdata_path": "/mnt/user/appdata/plex"
+        }
+    ]
+}
