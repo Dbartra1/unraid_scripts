@@ -3,12 +3,14 @@ from dotenv import load_dotenv
 import requests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Load environment variables from .env file
+
 load_dotenv()
 
-# Configuration from environment variables
+# Plex API details from .env
 PLEX_API_URL = os.getenv('PLEX_API_URL')
 PLEX_API_TOKEN = os.getenv('PLEX_API_TOKEN')
+
+# Overseer API details from .env
 OVERSEERR_API_URL = os.getenv('OVERSEERR_API_URL')
 OVERSEERR_API_TOKEN = os.getenv('OVERSEERR_API_TOKEN')
 USER_IDS = os.getenv('USER_IDS')

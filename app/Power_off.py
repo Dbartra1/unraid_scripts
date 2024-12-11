@@ -2,21 +2,9 @@ import os
 import requests
 import logging
 import time as t
-import pdb as p
 from dotenv import load_dotenv
 
-# Setup Logging
-logging.basicConfig(
-    filename="poweroff_log.log",
-    encoding="utf-8",
-    filemode="a",
-    format="{asctime} - {levelname} - {message}",
-    style="{",
-    datefmt="%Y-%m-%d %H:%M",
-    level=logging.INFO
-)
 
-# Load environment variables from a .env file
 load_dotenv()
 
 # Redfish API details from .env
@@ -28,8 +16,17 @@ IDRAC_HOST = os.getenv("IDRAC_HOST")
 PLEX_API_URL = os.getenv("PLEX_API_URL")
 PLEX_API_TOKEN = os.getenv("PLEX_API_TOKEN")
 
-# Settings
+# File path for logs
+LOG_PATH = os.getenv("LOG_PATH")
+
 MONITOR_DURATION = 30  # Duration in seconds to monitor Plex traffic
+
+logging.basicConfig(
+    filename=f"{LOG_PATH}/power_off_log_{t.strftime('%Y-%m-%d_%H-%M-%S')}.log",  # Formatted with current time
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Correct format string
+    datefmt='%Y-%m-%d %H:%M:%S'  # Time format for the log timestamps
+)
 
 
 # Function to get Plex session data with retries
@@ -86,7 +83,6 @@ def power_off_server(retries=3, delay=5):
             print(f"Exception occurred while powering off the server: {e}")
             logging.error(f"Exception occurred while powering off the server: {e}")
         
-        # Retry logic with delay
         t.sleep(delay)
 
     print("Failed to power off the server after multiple attempts.")
@@ -109,11 +105,7 @@ def is_server_on():
         logging.error(f"Exception occurred while checking server state: {e}")
         return False
 
-# Main execution
 if __name__ == "__main__":
-    # Debugging (remove or comment out if not needed)
-    # p.set_trace()
-
     if has_active_sessions():
         print("Plex traffic detected. No action required.")
         logging.info("Plex traffic detected. No action required.")

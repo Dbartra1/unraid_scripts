@@ -1,22 +1,9 @@
 import os
 import requests
 import logging
-import pdb as p
 import time as t
 from dotenv import load_dotenv
 
-# Setup Logging
-logging.basicConfig(
-    filename="poweron_log.log",
-    encoding="utf-8",
-    filemode="a",
-    format="{asctime} - {levelname} - {message}",
-    style="{",
-    datefmt="%Y-%m-%d %H:%M",
-    level=logging.INFO
-)
-
-## Load environment variables from a .env file
 load_dotenv()
 
 # Redfish API details from .env
@@ -28,7 +15,16 @@ IDRAC_HOST = os.getenv("IDRAC_HOST")
 PLEX_API_URL = os.getenv("PLEX_API_URL")
 PLEX_API_TOKEN = os.getenv("PLEX_API_TOKEN")
 
-# Function to power on the server
+# File path for logs
+LOG_PATH = os.getenv("LOG_PATH")
+
+logging.basicConfig(
+    filename=f"{LOG_PATH}/power_off_log_{t.strftime('%Y-%m-%d_%H-%M-%S')}.log",  # Formatted with current time
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(message)s',  # Correct format string
+    datefmt='%Y-%m-%d %H:%M:%S'  # Time format for the log timestamps
+)
+
 def power_on_server():
     url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
     payload = {"ResetType": "On"}
@@ -73,10 +69,8 @@ def get_plex_sessions_with_retries(retries=3, delay=5):
         t.sleep(delay)
     return None
 
-# Main Execution
 if __name__ == "__main__":
     if has_active_sessions():
-        # p.set_trace()  # Optional: Remove for production unless debugging
         print("Plex traffic detected. Attempting to power on the server.")
         logging.info("Plex traffic detected. Attempting to power on the server.")
         power_on_server()
