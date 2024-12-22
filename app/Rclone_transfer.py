@@ -66,10 +66,6 @@ def sync_directories_with_rclone():
     # Construct the rclone command
     rclone_command = [
         rclone_executable, "sync", 
-<<<<<<< HEAD
-
-=======
->>>>>>> bc8944d (Names of files are changed to more accurately)
         DIRECTORY_1, DIRECTORY_2,
         "--transfers", str(max_transfers),
         "--checkers", str(max_transfers),
