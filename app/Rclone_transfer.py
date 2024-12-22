@@ -66,7 +66,6 @@ def sync_directories_with_rclone():
     # Construct the rclone command
     rclone_command = [
         rclone_executable, "sync", 
-        #"C:\\Users\\dfbar\\AppData\\Local\Microsoft\\WinGet\\Packages\\Rclone.Rclone_Microsoft.Winget.Source_8wekyb3d8bbwe\\rclone-v1.68.2-windows-amd64\\rclone.exe", "sync",
         DIRECTORY_1, DIRECTORY_2,
         "--transfers", str(max_transfers),
         "--checkers", str(max_transfers),
