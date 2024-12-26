@@ -8,10 +8,10 @@ load_dotenv()
 
 # Directories to check
 directories = [
-    os.getenv('DIRECTORY_1'),
-    os.getenv('DIRECTORY_2'),
-    os.getenv('DIRECTORY_3'),
-    os.getenv('DIRECTORY_4')
+    os.getenv('CLEANUP_DIRECTORY_1'),
+    os.getenv('CLEANUP_DIRECTORY_2'),
+    os.getenv('CLEANUP_DIRECTORY_3'),
+    os.getenv('CLEANUP_DIRECTORY_4')
 ]
 
 # File path for logs
@@ -32,91 +32,85 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-def contains_only_non_media_files(directory):
-    """Check if a directory contains only non-media files."""
-    for entry in os.listdir(directory):
-        full_path = os.path.join(directory, entry)
-        if os.path.isfile(full_path):
-            _, ext = os.path.splitext(full_path)
+def list_media_directories(directory, media_dirs, depth=0, max_depth=10):
+    """List directories containing media files."""
+    if depth > max_depth:
+        logging.warning(f"Max recursion depth reached at: {directory}")
+        return
+
+    has_media = False
+    for entry in os.scandir(directory):
+        full_path = entry.path
+        if entry.is_file():
+            _, ext = os.path.splitext(entry.name)
             if ext.lower() in MEDIA_EXTENSIONS:
-                logging.debug(f"Media file detected: {full_path}")
-                return False  # Found a media file
-    return True  # No media files found
+                has_media = True
+        elif entry.is_dir():
+            list_media_directories(full_path, media_dirs, depth=depth+1, max_depth=max_depth)
 
-def remove_empty_dirs(directory, is_root=False, deleted_count=[0]):
-    """Recursively remove empty or non-media directories."""
-    logging.debug(f"Processing directory: {directory}")
-    is_empty = True  # Assume the directory is empty unless files or non-empty subdirectories are found
+    if has_media:
+        media_dirs.append(directory)
 
-    try:
-        for entry in os.listdir(directory):
-            full_path = os.path.join(directory, entry)
-            logging.debug(f"Found entry: {full_path}")
+def remove_empty_dirs(directory, is_root=False, deleted_count=None):
+    """Recursively remove empty directories and non-media files."""
+    if deleted_count is None:
+        deleted_count = [0]
 
-            if os.path.isdir(full_path):
-                logging.debug(f"Entering subdirectory: {full_path}")
-                if not remove_empty_dirs(full_path, deleted_count=deleted_count):
+    is_empty = True
+    for entry in os.scandir(directory):
+        full_path = entry.path
+        if entry.is_dir():
+            if not remove_empty_dirs(full_path, deleted_count=deleted_count):
+                is_empty = False
+        elif entry.is_file():
+            _, ext = os.path.splitext(entry.name)
+            if ext.lower() not in MEDIA_EXTENSIONS:
+                try:
+                    os.remove(full_path)
+                    logging.info(f"Deleted file: {full_path}")
+                except OSError as e:
+                    logging.error(f"Failed to delete file {full_path}: {e}")
                     is_empty = False
             else:
-                _, ext = os.path.splitext(full_path)
-                if ext.lower() in MEDIA_EXTENSIONS:
-                    logging.debug(f"Media file found: {full_path}")
-                    is_empty = False
-                else:
-                    # Delete non-media files
-                    try:
-                        os.remove(full_path)
-                        logging.info(f"Deleted file: {full_path}")
-                    except OSError as e:
-                        logging.error(f"Failed to delete file {full_path}: {e}")
-                        is_empty = False
+                is_empty = False
 
-        # If the directory is now empty, attempt to remove it
-        if is_empty or not contains_only_non_media_files(directory):
-            if not is_root:  # Do not delete the root working directory
-                try:
-                    os.rmdir(directory)
-                    logging.info(f"Removed directory: {directory}")
-                    deleted_count[0] += 1  # Increment the count
-                    return True  # Directory was removed
-                except OSError as e:
-                    logging.error(f"Failed to remove {directory}: {e}")
-                    return False
-        else:
-            is_empty = False
-    except FileNotFoundError:
-        logging.warning(f"Directory not found or inaccessible: {directory}")
-        is_empty = False
-    except PermissionError:
-        logging.error(f"Permission denied for directory: {directory}")
-        is_empty = False
-    except Exception as e:
-        logging.error(f"Unexpected error while processing {directory}: {e}")
-        is_empty = False
-
-    logging.debug(f"Finished processing directory: {directory}, is_empty: {is_empty}")
-    return is_empty
+    if is_empty and not is_root:
+        try:
+            os.rmdir(directory)
+            logging.info(f"Removed directory: {directory}")
+            deleted_count[0] += 1
+            return True
+        except OSError as e:
+            logging.error(f"Failed to remove directory {directory}: {e}")
+    return False
 
 
 def check_and_clean_directories(directories):
-    """Check and clean all provided directories."""
+    """Main function to check and clean directories."""
     total_dirs_processed = 0
-    deleted_count = [0]  # Use a mutable object to share count across recursive calls
+    deleted_count = [0]
+    media_dirs = []
 
     for directory in directories:
         if directory and os.path.exists(directory):
             logging.info(f"Checking directory: {directory}")
+            list_media_directories(directory, media_dirs)
             remove_empty_dirs(directory, is_root=True, deleted_count=deleted_count)
             total_dirs_processed += 1
         else:
             logging.warning(f"Invalid or non-existent directory: {directory}")
-            
+
     logging.info(f"Total directories processed: {total_dirs_processed}")
     logging.info(f"Total directories deleted: {deleted_count[0]}")
+    logging.info("Directories containing media files:")
+    for media_dir in media_dirs:
+        logging.info(media_dir)
 
-# Execute the script
-if __name__ == "__main__":
+def main():
+    """Entry point for the script."""
     logging.info("Starting directory cleanup process...")
     check_and_clean_directories(directories)
     logging.info("Directory cleanup process completed.")
 
+if __name__ == "__main__":
+    main()
