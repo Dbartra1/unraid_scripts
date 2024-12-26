@@ -1,18 +1,46 @@
 {
-    "backup_location": "/mnt/user/backups/appdata",
+    "backup_location": "//192.168.0.55/appdata/backup",
     "retention_days": 7,
     "containers": [
         {
             "name": "sonarr",
-            "appdata_path": "/mnt/user/appdata/sonarr"
+            "appdata_path": "//192.168.0.55/appdata/sonarr"
         },
         {
             "name": "radarr",
-            "appdata_path": "/mnt/user/appdata/radarr"
+            "appdata_path": "//192.168.0.55/appdata/radarr"
         },
         {
             "name": "plex",
-            "appdata_path": "/mnt/user/appdata/plex"
+            "appdata_path": "//192.168.0.55/appdata/plex"
+        },
+        {
+            "name": "jackett",
+            "appdata_path": "//192.168.0.55/appdata/jackett"
+        },
+        {
+            "name": "qbittorrent",
+            "appdata_path": "//192.168.0.55/appdata/qbittorrent"
+        },
+        {
+            "name": "binhex-sonarr",
+            "appdata_path": "//192.168.0.55/appdata/binhex-sonarr"
+        },
+        {
+            "name": "binhex-radarr",
+            "appdata_path": "//192.168.0.55/appdata/binhex-radarr"
+        },
+        {
+            "name": "binhex-plex",
+            "appdata_path": "//192.168.0.55/appdata/binhex-plex"
+        },
+        {
+            "name": "binhex-jackett",
+            "appdata_path": "//192.168.0.55/appdata/binhex-jackett"
+        },
+        {
+            "name": "binhex-qbittorrent",
+            "appdata_path": "//192.168.0.55/appdata/binhex-qbittorrent"
         }
     ]
 }
