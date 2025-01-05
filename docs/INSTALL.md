@@ -134,6 +134,7 @@ chown -R nobody:users /mnt/user/YourShare
 Logs are generated in the path set by LOG_PATH in your .env file.
 Check logs for errors or successes.
 
+
 # 📄 Docker Configuration Backup Script Setup Guide
 
 🛠️ 1. Prerequisites
@@ -178,3 +179,39 @@ Check logs for errors or successes.
    ```
 
    THIS SCRIPT WILL NOT COPY OVER KEYS OR LOCKED FILES USED BY DOCKER SECRETS, THIS IS ONLY TO BACK UP ITEMS LIKE DATABASE FILES SO THAT A DOCKER CONTAINER CAN BE RESTORED INCASE OF FAILURE!! 
+
+# Rclone Sync Script Setup
+
+🛠️ 1. Prerequisites
+
+   python 3.x installed.
+
+   Access to the target directories.
+
+    .env file configured with:
+      
+      ```env
+      DIRECTORY_1=/path/to/dir1
+      DIRECTORY_2=/path/to/dir2
+      DIRECTORY_3=/path/to/dir3
+      DIRECTORY_5=/path/to/dir4
+      LOG_PATH=/path/to/log
+      ```
+   In this script, the DIRECTORY_1 variable is a the source directory, and DIRECTORY_2 is the destination directory. Please keep this in mind, as it can result in undesired behavior if this is not setup correctly. 
+
+   Rclone can be configured for a few different syncing methods, the default behavior for this script is to use "copy" which only looks for differences and copies them to the source directory. The piece of the script that can be changed is included below. For more information please see the documentation here: [Rclone Documentation](https://rclone.org/docs/)
+
+   ```python
+   # Construct the rclone command
+    rclone_command = [
+        rclone_executable, "copy", 
+        DIRECTORY_1, DIRECTORY_2,
+        "--transfers", str(max_transfers),
+        "--checkers", str(max_transfers),
+        "--progress",
+        "--log-file", f"{LOG_PATH}/rclone_sync_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log",
+        "--log-level", "DEBUG",
+        "--exclude", ".Trash-99/**"
+    ```
+
+    ## PLEASE MAKE SURE YOU KNOW WHAT YOU ARE DOING BEFORE GETTING THIS SCRIPT ANYWHERE NEAR PRODUCTION DATA. THERE ARE CONFIGURATIONS OF RCLONE THAT WILL DELETE DATA IN NOT FOUND IN THE SOURCE DIRECTORY, SO DON'T TOUCH IT IF YOU DO NOT UNDERSTAND WHAT YOU ARE DOING. I AM NOT RESPONSIBLE FOR ANY LOST DATA.

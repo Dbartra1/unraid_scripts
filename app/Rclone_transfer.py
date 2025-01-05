@@ -16,9 +16,13 @@ DIRECTORY_2 = os.getenv("DIRECTORY_2")
 # File path for logs
 LOG_PATH = os.getenv("LOG_PATH")
 
+if not DIRECTORY_1 or not DIRECTORY_2 or not LOG_PATH:
+    raise ValueError("DIRECTORY_1, DIRECTORY_2, and LOG_PATH must be set in the .env file.")
+
 # Setup Logging
+log_file = f"{LOG_PATH}/rclone_sync_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log",  # Formatted with current time
 logging.basicConfig(
-    filename=f"{LOG_PATH}/rclone_sync_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log",  # Formatted with current time
+    filename=log_file,
     level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'  
@@ -49,38 +53,67 @@ def sync_directories_with_rclone():
 
     if not os.path.exists(DIRECTORY_2):
         logging.info(f"Destination directory {DIRECTORY_2} does not exist. Creating it.")
-        os.makedirs(DIRECTORY_2)
+        os.makedirs(DIRECTORY_2, exist_ok=True)
+        if not os.path.exists(DIRECTORY_2):
+            raise OSError(f"Failed to create destination directory: {DIRECTORY_2}. Exiting.")
     if not os.path.isdir(DIRECTORY_2):
         logging.error(f"{DIRECTORY_2} is not a valid directory. Exiting.")
         return
 
     max_transfers = get_max_transfers()
-    
-    rclone_executable = shutil.which("rclone")
-    
+
+    # Common fallback paths for rclone
+    COMMON_RCLONE_PATHS = [
+        "/usr/local/bin/rclone",
+        "/usr/bin/rclone",
+        "C:\\Program Files\\rclone\\rclone.exe",
+        "C:\\Program Files (x86)\\rclone\\rclone.exe"
+    ]
+
+    # Check environment variable first
+    rclone_executable = os.getenv("RCLONE_EXECUTABLE")
+
+    # If not set, check system PATH
+    if not rclone_executable:
+        rclone_executable = shutil.which("rclone")
+
+    # If still not found, search common fallback paths
+    if not rclone_executable:
+        for path in COMMON_RCLONE_PATHS:
+            if os.path.isfile(path) and os.access(path, os.X_OK):
+                rclone_executable = path
+                break
+
+    # Raise an error if rclone still isn't found
     if not rclone_executable:
         raise FileNotFoundError(
-            "Rclone executable not found. Ensure it's installed and available in your system PATH."
+            "Rclone executable not found. Ensure it's installed and either set via the 'RCLONE_EXECUTABLE' "
+            "environment variable, available in your system PATH, or located in a standard install directory."
         )
+
+    logging.info(f"Using rclone executable: {rclone_executable}")
 
     # Construct the rclone command
     rclone_command = [
-        rclone_executable, "sync", 
+        rclone_executable, "copy", 
         DIRECTORY_1, DIRECTORY_2,
         "--transfers", str(max_transfers),
         "--checkers", str(max_transfers),
         "--progress",
-        "--log-file", f"{LOG_PATH}/rclone_sync_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log",
-        "--log-level", "DEBUG"
+        "--log-file", log_file,
+        "--log-level", "DEBUG",
+        "--exclude", ".Trash-99/**"
     ]
 
     logging.info(f"Starting rclone sync: {DIRECTORY_1} -> {DIRECTORY_2}")
     try:
-        # Run the rclone command
-        subprocess.run(rclone_command, check=True)
+        result = subprocess.run(rclone_command, check=True, capture_output=True, text=True, timeout=3600)
+        logging.info(result.stdout)
+        if result.stderr:
+            logging.error(result.stderr)
         logging.info("Directory synchronization complete.")
     except subprocess.CalledProcessError as e:
-        logging.error(f"rclone command failed with error: {e}")
+        logging.error(f"rclone command failed with error: {e.stderr}")
     except Exception as e:
         logging.error(f"Unexpected error during rclone sync: {e}")
 
@@ -94,6 +127,8 @@ def main():
 
     except Exception as e:
         logging.error(f"An unexpected error occurred in the main logic: {e}")
+    
+    logging.info("Rclone transfer script completed successfully.")
 
 # Run the script
 if __name__ == "__main__":
