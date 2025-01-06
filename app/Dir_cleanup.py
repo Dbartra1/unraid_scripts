@@ -3,6 +3,12 @@ import time
 import logging
 from dotenv import load_dotenv
 
+"""__summary__
+This script is used to clean up specified directories, removing empty directories and non-media files. 
+It logs the process and the directories containing media files. 
+This is useful for use cases like cleaning up download directories on media servers and removing orphaned media directories and files within established media directories.
+"""
+
 # Load environment variables from .env file
 load_dotenv()
 
@@ -16,6 +22,23 @@ directories = [
 
 # File path for logs
 LOG_PATH = os.getenv("LOG_PATH")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
+
+# Map the log level string to actual logging levels
+LOG_LEVEL_MAPPING = {
+    'CRITICAL': logging.CRITICAL,
+    'ERROR': logging.ERROR,
+    'WARNING': logging.WARNING,
+    'INFO': logging.INFO,
+    'DEBUG': logging.DEBUG,
+    'NOTSET': logging.NOTSET
+}
+
+required_env_vars = ["CLEANUP_DIRECTORY_1", "LOG_LEVEL", "LOG_PATH"]
+missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+
+if missing_vars:
+    raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
 # Validate LOG_PATH
 if not LOG_PATH or not os.path.isdir(LOG_PATH):
@@ -24,64 +47,57 @@ if not LOG_PATH or not os.path.isdir(LOG_PATH):
 # Media file extensions
 MEDIA_EXTENSIONS = {'.mkv', '.mp4', '.mp3', '.wav', '.flac', '.avi', '.mov'}
 
+# Default to DEBUG if the provided LOG_LEVEL isn't valid
+log_level = LOG_LEVEL_MAPPING.get(LOG_LEVEL, logging.DEBUG)
+
 # Setup Logging
 logging.basicConfig(
     filename=f"{LOG_PATH}/directory_cleanup_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log",
-    level=logging.DEBUG,
+    level=log_level,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 
-def list_media_directories(directory, media_dirs, depth=0, max_depth=10):
-    """List directories containing media files."""
+def process_directory(directory, media_dirs, deleted_count, depth=0, max_depth=10):
+    """Process a directory to identify media and clean non-media files."""
     if depth > max_depth:
         logging.warning(f"Max recursion depth reached at: {directory}")
-        return
-
+        return False
+    
     has_media = False
-    for entry in os.scandir(directory):
-        full_path = entry.path
-        if entry.is_file():
-            _, ext = os.path.splitext(entry.name)
-            if ext.lower() in MEDIA_EXTENSIONS:
-                has_media = True
-        elif entry.is_dir():
-            list_media_directories(full_path, media_dirs, depth=depth+1, max_depth=max_depth)
-
-    if has_media:
-        media_dirs.append(directory)
-
-def remove_empty_dirs(directory, is_root=False, deleted_count=None):
-    """Recursively remove empty directories and non-media files."""
-    if deleted_count is None:
-        deleted_count = [0]
-
     is_empty = True
-    for entry in os.scandir(directory):
-        full_path = entry.path
-        if entry.is_dir():
-            if not remove_empty_dirs(full_path, deleted_count=deleted_count):
-                is_empty = False
-        elif entry.is_file():
-            _, ext = os.path.splitext(entry.name)
-            if ext.lower() not in MEDIA_EXTENSIONS:
-                try:
-                    os.remove(full_path)
-                    logging.info(f"Deleted file: {full_path}")
-                except OSError as e:
-                    logging.error(f"Failed to delete file {full_path}: {e}")
+    
+    try:
+        for entry in os.scandir(directory):
+            full_path = entry.path
+            if entry.is_file():
+                _, ext = os.path.splitext(entry.name)
+                if ext.lower() in MEDIA_EXTENSIONS:
+                    has_media = True
                     is_empty = False
-            else:
-                is_empty = False
-
-    if is_empty and not is_root:
-        try:
+                else:
+                    try:
+                        os.remove(full_path)
+                        logging.info(f"Deleted file: {full_path}")
+                    except OSError as e:
+                        logging.error(f"Failed to delete file {full_path}: {e}")
+                        is_empty = False
+            elif entry.is_dir():
+                if not process_directory(full_path, media_dirs, deleted_count, depth=depth+1, max_depth=max_depth):
+                    is_empty = False
+        
+        if has_media:
+            media_dirs.append(directory)
+        
+        if is_empty and depth > 0:
             os.rmdir(directory)
             logging.info(f"Removed directory: {directory}")
             deleted_count[0] += 1
             return True
-        except OSError as e:
-            logging.error(f"Failed to remove directory {directory}: {e}")
+        
+    except OSError as e:
+        logging.error(f"Failed to process directory {directory}: {e}")
+    
     return False
 
 
@@ -94,8 +110,7 @@ def check_and_clean_directories(directories):
     for directory in directories:
         if directory and os.path.exists(directory):
             logging.info(f"Checking directory: {directory}")
-            list_media_directories(directory, media_dirs)
-            remove_empty_dirs(directory, is_root=True, deleted_count=deleted_count)
+            process_directory(directory, media_dirs, deleted_count)
             total_dirs_processed += 1
         else:
             logging.warning(f"Invalid or non-existent directory: {directory}")

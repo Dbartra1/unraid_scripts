@@ -3,9 +3,21 @@ import time
 import psutil
 import logging
 import shutil
+import requests
 from tqdm import tqdm
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
+
+"""_summary_
+This script is designed to synchronize the contents of two directories. It compares the files in the source directory, DIRECTORY_1, 
+with the destination directory, DIRECTORY_2, and copies any missing or updated files from the source to the destination.
+    
+This script can be used to keep two directories in sync, ensuring that the destination directory is an exact replica of the source directory.
+    
+This script leverages the `requests` library to send power-on and power-off commands to a Dell server via the Redfish API.
+    
+This script is the most detailed in it's comparison of the two directories, using Hashes to compare the files and ensure they are identical. This also means that the script is the slowest in its comparison.
+"""
 
 # Load environment variables from a .env file
 load_dotenv()
@@ -14,16 +26,91 @@ load_dotenv()
 DIRECTORY_1 = os.getenv("DIRECTORY_1")
 DIRECTORY_2 = os.getenv("DIRECTORY_2")
 
+# Redfish API details from .env
+IDRAC_USER = os.getenv("IDRAC_USER")
+IDRAC_PASS = os.getenv("IDRAC_PASS")
+IDRAC_HOST = os.getenv("IDRAC_HOST")
+ENABLE_IDRAC = os.getenv("ENABLE_IDRAC", "FALSE").upper()
+
 # File path for logs
 LOG_PATH = os.getenv("LOG_PATH")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
+
+# Map the log level string to actual logging levels
+LOG_LEVEL_MAPPING = {
+    'CRITICAL': logging.CRITICAL,
+    'ERROR': logging.ERROR,
+    'WARNING': logging.WARNING,
+    'INFO': logging.INFO,
+    'DEBUG': logging.DEBUG,
+    'NOTSET': logging.NOTSET
+}
+
+required_env_vars = ["DIRECTORY_1", "DIRECTORY_2", "LOG_PATH"]
+missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+
+if missing_vars:
+    raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
+
+# Default to DEBUG if the provided LOG_LEVEL isn't valid
+log_level = LOG_LEVEL_MAPPING.get(LOG_LEVEL, logging.DEBUG)
 
 # Setup Logging
 logging.basicConfig(
-    filename=f"{LOG_PATH}/file_transfer_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log",  # Formatted with current time
-    level=logging.DEBUG,
+    filename=f"{LOG_PATH}/directory_cleanup_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log",
+    level=log_level,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'  
+    datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+# Function to power on the Dell server
+def power_on_server():
+    url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
+    payload = {"ResetType": "On"}
+    max_retries = 12 # 12 retries * 5 seconds = 60 seconds
+    retry_count = 0
+    
+    while retry_count < max_retries:
+        try:
+            response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
+            
+            if response.status_code == 204:
+                logging.debug("Power-on command sent successfully.")
+                print("Giving time for the server to boot!")
+                time.sleep(360)
+                return
+            elif response.status_code == 409:
+                logging.debug("Server is already powered on.")
+                break
+            else:
+                logging.warning(f"Unexpected response: {response.status_code}, {response.text}")
+            
+            # Wait for a short duration before sending the next request
+            retry_count += 1
+            time.sleep(5)
+        except requests.RequestException as e:
+            logging.error(f"Error while sending power-on request: {e}")
+            retry_count += 1
+            time.sleep(5)  # Retry after a delay
+    logging.error("Failed to power on Dell server. Exiting script.")
+    
+# Function to power off the Dell server
+def power_off_server():
+    url = f"{IDRAC_HOST}/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
+    payload = {"ResetType": "ForceOff"}
+    max_retries = 5
+    
+    for attempt in range(max_retries):
+        try:
+            response = requests.post(url, json=payload, auth=(IDRAC_USER, IDRAC_PASS), verify=False)
+            if response.status_code == 204:
+                logging.debug("Dell server powered off successfully.")
+                return
+            logging.warning(f"Attempt {attempt + 1}: Unexpected response - {response.status_code}, {response.text}")
+        except requests.RequestException as e:
+            logging.error(f"Attempt {attempt + 1}: Error while powering off server: {e}")
+        time.sleep(5)
+    logging.error("Failed to power off Dell server after retries.")
 
 # Function to determine system resources and set max_workers
 def get_max_workers():
@@ -64,10 +151,11 @@ def files_are_equal(file1, file2):
     try:
         stat1 = os.stat(file1)
         stat2 = os.stat(file2)
-        if stat1.st_size != stat2.st_size:
+        
+        if stat1.st_size != stat2.st_size or stat1.st_mtime != stat2.st_mtime:
             return False
         
-        # Use hash comparison for accuracy
+        # Fallback to hash comparison for accuracy and absolute certainty
         hash1 = hash_file(file1)
         hash2 = hash_file(file2)
         if hash1 is None or hash2 is None:
@@ -118,35 +206,50 @@ def sync_directories():
     with ThreadPoolExecutor(max_workers=max_workers) as executor:  # Set number of workers dynamically
         futures = []
         with tqdm(total=total_files, desc="Syncing Directories", unit="file") as progress:
-            for root, _, files in os.walk(DIRECTORY_1):
-                rel_path = os.path.relpath(root, DIRECTORY_1)
-                dest_subdir = os.path.join(DIRECTORY_2, rel_path)
+            try:
+                for root, _, files in os.walk(DIRECTORY_1):
+                    rel_path = os.path.relpath(root, DIRECTORY_1)
+                    dest_subdir = os.path.join(DIRECTORY_2, rel_path)
 
-                if not os.path.exists(dest_subdir):
-                    os.makedirs(dest_subdir)
+                    if not os.path.exists(dest_subdir):
+                        os.makedirs(dest_subdir)
 
-                for file_name in files:
-                    src_file = os.path.join(root, file_name)
-                    dest_file = os.path.join(dest_subdir, file_name)
-
-                    # Submit the file copy task to the thread pool, passing files_copied
-                    futures.append(executor.submit(sync_file, src_file, dest_file, files_copied))
+                    for file_name in files:
+                        src_file = os.path.join(root, file_name)
+                        dest_file = os.path.join(dest_subdir, file_name)
+                        futures.append(executor.submit(sync_file, src_file, dest_file, files_copied))
             
-            for _ in as_completed(futures):
-                progress.update(1)
+                for _ in as_completed(futures):
+                    try:
+                        progress.update(1)
+                    except Exception as e:
+                        logging.error(f"Exception occurred during directory sync: {e}")
+            finally:
+                executor.shutdown(wait=True)
 
     logging.info(f"Directory synchronization complete. Files copied: {files_copied[0]}")
 
 def main():
     logging.debug("Starting the script...")
-
-    try:
-        # Synchronize directories
-        logging.debug(f"Starting synchronization: {DIRECTORY_1} -> {DIRECTORY_2}")
-        sync_directories()
-
-    except Exception as e:
-        logging.error(f"An unexpected error occurred in the main logic: {e}")
+    
+    if ENABLE_IDRAC == "TRUE":
+        try:
+            logging.info("IDRAC mode enabled. Attempting to power on the Dell server.")
+            power_on_server()
+            
+            logging.info("Starting directory synchronization...")
+            sync_directories()
+            
+            logging.info("Synchronization complete. Attempting to power off the Dell server.")
+            power_off_server()
+        except Exception as e:
+            logging.error(f"An error occurred during IDRAC-enabled execution: {e}")
+    else:
+        try:
+            logging.info("IDRAC is disabled. Proceeding with directory synchronization only.")
+            sync_directories()
+        except Exception as e:
+            logging.error(f"An error occurred during synchronization: {e}")
 
 # Run the script
 if __name__ == "__main__":

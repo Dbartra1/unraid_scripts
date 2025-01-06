@@ -1,46 +1,46 @@
 {
-    "backup_location": "//192.168.0.55/appdata/backup",
-    "retention_days": 7,
-    "containers": [
+    "BACKUP_LOCATION": "//YOUR_IP/BACKUP/LOCATION",
+    "RETENTION_DAYS": 7,
+    "CONTAINERS": [
         {
             "name": "sonarr",
-            "appdata_path": "//192.168.0.55/appdata/sonarr"
+            "appdata_path": "//YOUR_IP/appdata/sonarr"
         },
         {
             "name": "radarr",
-            "appdata_path": "//192.168.0.55/appdata/radarr"
+            "appdata_path": "//YOUR_IP/appdata/radarr"
         },
         {
             "name": "plex",
-            "appdata_path": "//192.168.0.55/appdata/plex"
+            "appdata_path": "//YOUR_IP/appdata/plex"
         },
         {
             "name": "jackett",
-            "appdata_path": "//192.168.0.55/appdata/jackett"
+            "appdata_path": "//YOUR_IP/appdata/jackett"
         },
         {
             "name": "qbittorrent",
-            "appdata_path": "//192.168.0.55/appdata/qbittorrent"
+            "appdata_path": "//YOUR_IP/appdata/qbittorrent"
         },
         {
             "name": "binhex-sonarr",
-            "appdata_path": "//192.168.0.55/appdata/binhex-sonarr"
+            "appdata_path": "//YOUR_IP/appdata/binhex-sonarr"
         },
         {
             "name": "binhex-radarr",
-            "appdata_path": "//192.168.0.55/appdata/binhex-radarr"
+            "appdata_path": "//YOUR_IP/appdata/binhex-radarr"
         },
         {
             "name": "binhex-plex",
-            "appdata_path": "//192.168.0.55/appdata/binhex-plex"
+            "appdata_path": "//YOUR_IP/appdata/binhex-plex"
         },
         {
             "name": "binhex-jackett",
-            "appdata_path": "//192.168.0.55/appdata/binhex-jackett"
+            "appdata_path": "//YOUR_IP/appdata/binhex-jackett"
         },
         {
             "name": "binhex-qbittorrent",
-            "appdata_path": "//192.168.0.55/appdata/binhex-qbittorrent"
+            "appdata_path": "//YOUR_IP/appdata/binhex-qbittorrent"
         }
     ]
 }

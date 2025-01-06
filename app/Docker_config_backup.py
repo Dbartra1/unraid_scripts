@@ -34,7 +34,7 @@ def load_config(config_file):
         with open(config_file, "r") as file:
             config = json.load(file)
         
-        required_keys = ["backup_location", "retention_days", "containers"]
+        required_keys = ["BACKUP_LOCATION", "RETENTION_DAYS", "CONTAINERS"]
         for key in required_keys:
             if key not in config:
                 raise KeyError(f"Missing required key: {key}")
@@ -113,17 +113,19 @@ def main():
 
     logging.info("Loading configuration...")
     config = load_config(CONFIG_FILE)
-    backup_location = config["backup_location"]
-    retention_days = config["retention_days"]
-    containers = config["containers"]
+    backup_location = config["BACKUP_LOCATION"]
+    retention_days = config["RETENTION_DAYS"]
+    containers = config["CONTAINERS"]
 
     # Create backups for each container
     for container in containers:
         if PAUSE_CONTAINERS:
             manage_container(container["name"], "stop")
-        create_backup(container["appdata_path"], backup_location, container["name"], args.dry_run)
-        if PAUSE_CONTAINERS:
+            create_backup(container["appdata_path"], backup_location, container["name"], args.dry_run)
             manage_container(container["name"], "start")
+        else:
+            create_backup(container["appdata_path"], backup_location, container["name"], args.dry_run)
+
 
     # Cleanup old backups
     logging.info("Starting cleanup process...")
