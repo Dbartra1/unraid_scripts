@@ -13,46 +13,55 @@ This repository contains a set of custom scripts designed to streamline and auto
 
 - **app/templates**: Contains all of the HTML templating for flask.
 - **app/**: Contains all the custom scripts, categorized by their functionality.
+- **docs/**: Contains extended project documentation.
+- **config/**: Contains configuration files for scripts contained in the app/ folder.
 - **logs/**: Contains any logs output from the set of scripts in app/.
 - **tests/**: Contains all the python specific unit testing materials.
-- **docker-compose**: Contains all of the needed information to build this as a docker container.
+- **Dockerfile**: Contains all of the needed information to build this as a docker container.
 - **README.md**: Documentation for the repository, including setup and usage guidelines.
 - **LICENSE**: Specifies the licensing terms for this repository.
 
 ## Features
 
-- Automation of power state based on activity on a plex account.
+- Ability to schedule tasks via chron jobs. 
+- Automation of power state for IDRAC and WOL based systems
 - Easy integration with Unraid's User Scripts plugin.
-- Modular scripts that address various system requirements.
-- Easy integration with Sonarr, Radarr, and Overseer
-- Easy file syncing between two servers on network.
+- Easy to understand project structure for further customization. 
+- Modular scripts that are built to address automation tasks in the most platform agnostic way possible.
+- Easy integration with Sonarr, Radarr, Overseer, and Plex.
+- Easy file syncing between two servers either on the local network or in the cloud.
+- Multiple file syncing methodologies with varying degrees of granularity and accuracy. 
 - Lite Web UI via the Flask API
 
 ## Prerequisites
 
 - **Unraid/Docker**: Ensure Unraid is installed and configured or Docker is installed on host machine.
 - **Python Environment**: Most scripts are written in python and require a python environment locally to run.
+- **Installed Dependencies**: Install dependencies as listed below, see the install documentation for more details.
+- **Access Requirements**: The account running the Docker container needs proper Read/Write/Delete permissions to the directories it will be interacting with. More information in the install instructions.
 
 ## Python Imports/Dependencies
 
 #### **These are all listed in the requirements.txt file in the repository, these can be mass installed via the CLI or installed when the docker container is built.**
 
 - **requests**
-- **subprocess**
-- **time**
-- **logging**
+- **dotenv**
+- **crontab**
+- **tarfile**
 - **dotenv**
 - **pdb**
 - **responses**
 - **coverage**
 - **flask**
-- **crontab**
+- **json**
 - **tqdm**
+- **psutil**
 
 ## Usage
 
-- **Running Scripts**: Scripts can be executed manually or scheduled using the cron functionality in the User Scripts plugin.
-- **Customization**: Modify script parameters located in the .env file to suit your specific Unraid setup.
+- **Running Scripts**: Scripts can be executed manually or scheduled using the cron functionality built into the Flask UI/CLI.
+- **Customization**: Modify script parameters located in the .env file to suit your specific setup.
+- **Modularity**: This project was built with modularity in mind, trying our best to provide a customizable project structure.
 
 ## Other Dependencies
 
