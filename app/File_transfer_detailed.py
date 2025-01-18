@@ -88,7 +88,7 @@ def send_wol_packet(mac_address):
         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
             sock.sendto(magic_packet, (TARGET_IP, TARGET_PORT))
-        logging.info(f"Magic packet sent to {mac_address} via {TARGET_IP}:{TARGET_PORT}")
+        logging.debug(f"Magic packet sent to {TARGET_IP}:{TARGET_PORT}")
     except Exception as e:
         logging.error(f"Failed to send WOL packet: {e}")
 

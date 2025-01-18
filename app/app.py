@@ -2,7 +2,7 @@ import os
 import subprocess
 from dotenv import load_dotenv
 from flask import Flask, jsonify, render_template, request
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy, enum
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 
@@ -19,12 +19,17 @@ db = SQLAlchemy(app)
 scheduler = BackgroundScheduler()
 scheduler.start()
 
+class JobStatus(enum.Enum):
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+    COMPLETED = 'completed'
+
 # Job model
 class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     script_name = db.Column(db.String(120), nullable=False)
     frequency = db.Column(db.String(120), nullable=False)
-    status = db.Column(db.String(10), default='active')
+    status = db.Column(db.Enum(JobStatus), default=JobStatus.ACTIVE)
     
 # Initialize the database
 with app.app_context():
