@@ -4,6 +4,8 @@ import psutil
 import logging
 import shutil
 import requests
+import socket
+import platform
 from tqdm import tqdm
 from dotenv import load_dotenv
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -11,12 +13,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 """_summary_
 This script is designed to synchronize the contents of two directories. It compares the files in the source directory, DIRECTORY_1, 
 with the destination directory, DIRECTORY_2, and copies any missing or updated files from the source to the destination.
-    
 This script can be used to keep two directories in sync, ensuring that the destination directory is an exact replica of the source directory.
-    
 This script leverages the `requests` library to send power-on and power-off commands to a Dell server via the Redfish API.
-    
-This script is the most detailed in it's comparison of the two directories, using Hashes to compare the files and ensure they are identical. This also means that the script is the slowest in its comparison.
+This script can send WOL packets as well as power on/off Dell servers using iDRAC. This needs to be enabled in the .env file.
 """
 
 # Load environment variables from a .env file
@@ -32,6 +31,13 @@ IDRAC_PASS = os.getenv("IDRAC_PASS")
 IDRAC_HOST = os.getenv("IDRAC_HOST")
 ENABLE_IDRAC = os.getenv("ENABLE_IDRAC", "FALSE").upper()
 
+# WOL Configurations
+ENABLE_WOL = os.getenv("ENABLE_WOL", "False").lower() == "true"
+TARGET_MAC = os.getenv("TARGET_MAC")
+TARGET_IP = os.getenv("TARGET_IP", "255.255.255.255")  # Default to broadcast
+TARGET_PORT = int(os.getenv("TARGET_PORT", 9))
+
+
 # File path for logs
 LOG_PATH = os.getenv("LOG_PATH")
 LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
@@ -46,7 +52,7 @@ LOG_LEVEL_MAPPING = {
     'NOTSET': logging.NOTSET
 }
 
-required_env_vars = ["DIRECTORY_1", "DIRECTORY_2", "LOG_PATH"]
+required_env_vars = ["DIRECTORY_1", "DIRECTORY_2", "LOG_PATH", "LOG_LEVEL"]
 missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 
 if missing_vars:
@@ -62,6 +68,38 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
+
+def send_wol_packet(mac_address):
+    """Send a Wake-On-LAN magic packet to a specific MAC address."""
+    if not mac_address:
+        logging.error("No MAC address provided for WOL. Skipping WOL.")
+        return
+
+    mac_address = mac_address.replace(":", "").replace("-", "")
+    if len(mac_address) != 12:
+        raise ValueError("Invalid MAC address format")
+
+    # Create the magic packet
+    data = b"FF" * 6 + (mac_address * 16).encode()
+    magic_packet = bytes.fromhex(data.decode())
+
+    # Send the packet
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            sock.sendto(magic_packet, (TARGET_IP, TARGET_PORT))
+        logging.info(f"Magic packet sent to {mac_address} via {TARGET_IP}:{TARGET_PORT}")
+    except Exception as e:
+        logging.error(f"Failed to send WOL packet: {e}")
+
+def shutdown_machine():
+    system = platform.system()
+    if system == "Windows":
+        os.system("shutdown /s /t 0")
+    elif system in ("Linux", "Darwin"):  # Linux or macOS
+        os.system("sudo shutdown now")
+    else:
+        logging.info(f"Unsupported OS: {system}")
 
 # Function to power on the Dell server
 def power_on_server():
@@ -231,25 +269,48 @@ def sync_directories():
 
 def main():
     logging.debug("Starting the script...")
-    
+
+    # Step 1: Handle WOL if enabled
+    if ENABLE_WOL == "TRUE":
+        try:
+            logging.info("WOL mode enabled. Attempting to power on the Dell server.")
+            send_wol_packet(TARGET_MAC)
+            logging.info("WOL packet sent successfully. Waiting for the server to boot.")
+            time.sleep(30)  # Wait for the server to power on (adjust as needed)
+        except Exception as e:
+            logging.error(f"Error during WOL execution: {e}")
+            return  # Exit script if WOL fails
+
+    # Step 2: Handle iDRAC if enabled
     if ENABLE_IDRAC == "TRUE":
         try:
-            logging.info("IDRAC mode enabled. Attempting to power on the Dell server.")
+            logging.info("IDRAC mode enabled. Powering on the Dell server.")
             power_on_server()
-            
-            logging.info("Starting directory synchronization...")
-            sync_directories()
-            
-            logging.info("Synchronization complete. Attempting to power off the Dell server.")
+        except Exception as e:
+            logging.error(f"Error during iDRAC power-on: {e}")
+            return  # Exit script if iDRAC fails
+
+    # Step 3: Perform synchronization
+    try:
+        logging.info("Starting directory synchronization.")
+        sync_directories()
+        logging.info("Directory synchronization completed successfully.")
+    except Exception as e:
+        logging.error(f"An error occurred during synchronization: {e}")
+        return  # Exit script if synchronization fails
+
+    # Step 4: Handle shutdown if WOL or iDRAC was used
+    try:
+        if ENABLE_WOL == "TRUE":
+            logging.info("WOL mode enabled. Sending shutdown magic packet.")
+            shutdown_machine()
+        if ENABLE_IDRAC == "TRUE":
+            logging.info("IDRAC mode enabled. Powering off the Dell server.")
             power_off_server()
-        except Exception as e:
-            logging.error(f"An error occurred during IDRAC-enabled execution: {e}")
-    else:
-        try:
-            logging.info("IDRAC is disabled. Proceeding with directory synchronization only.")
-            sync_directories()
-        except Exception as e:
-            logging.error(f"An error occurred during synchronization: {e}")
+    except Exception as e:
+        logging.error(f"Error during server shutdown: {e}")
+
+    logging.info("File transfer script completed successfully.")
 
 # Run the script
 if __name__ == "__main__":

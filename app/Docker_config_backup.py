@@ -7,20 +7,46 @@ import argparse
 import time
 import subprocess
 
+"""__summary__
+This script is used to backup Docker appdata directories to a specified location.
+It creates a compressed tarball of the appdata directory for each container and cleans up old backups based on a retention period.
+This is useful for backing up Docker containers that store data in appdata directories.
+"""
+
 # Configuration
 CONFIG_FILE = os.path.join(os.getenv("CONFIG_PATH", ""), "backup_config.json")
 
 # File path for logs
-LOG_PATH = os.getenv("LOG_PATH", "")
+LOG_PATH = os.getenv("LOG_PATH")
+LOG_LEVEL = os.getenv("LOG_LEVEL", "DEBUG").upper()
+
+# Map the log level string to actual logging levels
+LOG_LEVEL_MAPPING = {
+    'CRITICAL': logging.CRITICAL,
+    'ERROR': logging.ERROR,
+    'WARNING': logging.WARNING,
+    'INFO': logging.INFO,
+    'DEBUG': logging.DEBUG,
+    'NOTSET': logging.NOTSET
+}
+
+required_env_vars = ["CONFIG_PATH", "LOG_LEVEL", "LOG_PATH"]
+missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+
+if missing_vars:
+    raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
 # Validate LOG_PATH
-if not os.path.exists(LOG_PATH):
-    os.makedirs(LOG_PATH, exist_ok=True)
+if not LOG_PATH or not os.path.isdir(LOG_PATH):
+    raise ValueError(f"Invalid LOG_PATH: {LOG_PATH}. Please set a valid path in your .env file.")
+
+# Default to DEBUG if the provided LOG_LEVEL isn't valid
+log_level = LOG_LEVEL_MAPPING.get(LOG_LEVEL, logging.DEBUG)
 
 # Setup Logging
 logging.basicConfig(
-    filename=os.path.join(LOG_PATH, f"docker_config_backup_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log"),
-    level=logging.DEBUG,
+    filename=f"{LOG_PATH}/directory_cleanup_log_{time.strftime('%Y-%m-%d_%H-%M-%S')}.log",
+    level=log_level,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
 )
