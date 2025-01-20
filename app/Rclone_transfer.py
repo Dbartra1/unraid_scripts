@@ -4,6 +4,7 @@ import psutil
 import shutil
 import logging
 import requests
+import re
 import platform
 import socket
 from dotenv import load_dotenv
@@ -30,12 +31,17 @@ IDRAC_PASS = os.getenv("IDRAC_PASS")
 IDRAC_HOST = os.getenv("IDRAC_HOST")
 ENABLE_IDRAC = os.getenv("ENABLE_IDRAC", "FALSE").upper()
 
+if ENABLE_IDRAC == "TRUE" and not all([IDRAC_USER, IDRAC_PASS, IDRAC_HOST]):
+    raise EnvironmentError("Missing iDRAC configurations. Please provide IDRAC_USER, IDRAC_PASS, and IDRAC_HOST.")
+
 # WOL Configurations
 ENABLE_WOL = os.getenv("ENABLE_WOL", "False").lower() == "true"
 TARGET_MAC = os.getenv("TARGET_MAC")
 TARGET_IP = os.getenv("TARGET_IP", "255.255.255.255")  # Default to broadcast
 TARGET_PORT = int(os.getenv("TARGET_PORT", 9))
 
+if ENABLE_WOL == "TRUE" and not all([TARGET_MAC, TARGET_IP, TARGET_PORT]):
+    raise ValueError("Missing WOL configurations. Please provide TARGET_MAC, TARGET_IP, and TARGET_PORT.")
 
 # File path for logs
 LOG_PATH = os.getenv("LOG_PATH")
@@ -58,7 +64,7 @@ if missing_vars:
     raise EnvironmentError(f"Missing required environment variables: {', '.join(missing_vars)}")
 
 # Default to DEBUG if the provided LOG_LEVEL isn't valid
-log_level = LOG_LEVEL_MAPPING.get(LOG_LEVEL, logging.DEBUG)
+log_level = LOG_LEVEL_MAPPING.get(LOG_LEVEL, logging.INFO)
 
 # Setup Logging
 logging.basicConfig(
@@ -73,8 +79,11 @@ def send_wol_packet(mac_address):
     if not mac_address:
         logging.error("No MAC address provided for WOL. Skipping WOL.")
         return
+    
+    if not re.match(r"([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})", mac_address):
+        raise ValueError("Invalid MAC address format. Use the format 'XX:XX:XX:XX:XX:XX' or 'XX-XX-XX-XX-XX-XX'")
 
-    mac_address = mac_address.replace(":", "").replace("-", "")
+    mac_address = mac_address.replace(":", "").replace("-", "").upper()
     if len(mac_address) != 12:
         raise ValueError("Invalid MAC address format")
 
