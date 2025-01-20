@@ -3,6 +3,9 @@ import time
 import logging
 from dotenv import load_dotenv
 
+# Media file extensions
+MEDIA_EXTENSIONS = {'.mkv', '.mp4', '.mp3', '.wav', '.flac', '.avi', '.mov'}
+
 """__summary__
 This script is used to clean up specified directories, removing empty directories and non-media files. 
 It logs the process and the directories containing media files. 
@@ -44,9 +47,6 @@ if missing_vars:
 if not LOG_PATH or not os.path.isdir(LOG_PATH):
     raise ValueError(f"Invalid LOG_PATH: {LOG_PATH}. Please set a valid path in your .env file.")
 
-# Media file extensions
-MEDIA_EXTENSIONS = {'.mkv', '.mp4', '.mp3', '.wav', '.flac', '.avi', '.mov'}
-
 # Default to DEBUG if the provided LOG_LEVEL isn't valid
 log_level = LOG_LEVEL_MAPPING.get(LOG_LEVEL, logging.DEBUG)
 
@@ -56,7 +56,6 @@ logging.basicConfig(
     level=log_level,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
-)
 
 def process_directory(directory, media_dirs, deleted_count, depth=0, max_depth=10):
     """Process a directory to identify media and clean non-media files."""
