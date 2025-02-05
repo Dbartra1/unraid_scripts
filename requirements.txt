@@ -7,6 +7,5 @@ flask-sqlalchemy
 apscheduler
 tqdm
 crontab
-tarfile
-json
 psutil
+dependency-injector
