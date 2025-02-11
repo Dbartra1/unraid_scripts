@@ -9,6 +9,9 @@ class JobStatus(Enum):
     INACTIVE = 'inactive'
     COMPLETED = 'completed'
 
+    def __str__(self):
+        return str(self.value).lower()
+
 class Job(db.Model):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     script_name: Mapped[str] = mapped_column(String(120))

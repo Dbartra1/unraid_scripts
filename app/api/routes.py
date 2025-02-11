@@ -1,61 +1,50 @@
-import os
-import subprocess
-from apscheduler.triggers.cron import CronTrigger
 from flask import Blueprint, jsonify, request
+
 from app.services import job_service
 
 job_router_blueprint = Blueprint('job_router', __name__, url_prefix="/job")
 job_service = job_service.JobService()
 
-@job_router_blueprint.route('/', methods=['GET'])
+@job_router_blueprint.route("/", methods=["GET"])
 def list_jobs():
-    print("WE ARE IN THE ROUTE")
     jobs = job_service.get_jobs()
-    # return jsonify(jobs), 200
-    blah = {job.id: job.id for job in jobs}
-    return jsonify(blah), 200
+    return jsonify(jobs), 200 # TODO error handling
 
-    # @job_router.route('/job', methods=['POST'])
-    # def add_job():
-    #     data = request.json
-    #     script_name = data.get('script_name')
-    #     frequency = data.get('frequency')
-        
-    #     job = db.session.query(DBModels.Job).filter_by(script_name=script_name).first()
-    #     if job:
-    #         job.frequency = frequency
-    #     else:
-    #         job = DBModels.Job(script_name=script_name, frequency=frequency)
-    #         db.session.add(job)
-        
-    #     db.session.commit()
-        
-    #     scheduler.add_job(
-    #         execute_script,
-    #         CronTrigger.from_crontab(frequency),
-    #         args=[script_name],
-    #         id=script_name
-    #     )
-        
-    #     return jsonify({'message': 'Job added successfully'}), 200
+@job_router_blueprint.route("/<int:job_id>", methods=["GET"])
+def list_jobs():
+    job = job_service.get_job()
+    return jsonify(job), 200 # TODO error handling
 
-    # @job_router.route('/job/<int:job_id>', methods=['DELETE'])
-    # def cancel_job(job_id):
-    #     job = db.session.query(DBModels.Job).get(job_id)
-    #     if job:
-    #         scheduler.remove_job(job.script_name)
-    #         db.session.delete(job)
-    #         job.status = 'inactive'
-    #         db.session.commit()
-    #         return jsonify({'message': 'Job deleted successfully'}), 200
-    #     else:
-    #         return jsonify({'error': 'Job not found'}), 404
+@job_router_blueprint.route('/', methods=["POST", "PATCH"])
+def add_job():
+    data = request.json
+    script_name = data.get('script_name')
+    frequency = data.get('frequency')
+
+    job = None
+    if request.method == "POST":
+        job = job_service.add_job(script_name, frequency)
+    elif request.method == "PATCH":
+        job = job_service.update_job(script_name, frequency)
+    else:
+        return jsonify("the fuck you doin?"), 400
+
+    
+    return jsonify(job), 200 # TODO error handling
+
+@job_router_blueprint.route('/job/<int:job_id>', methods=['DELETE'])
+def cancel_job(job_id):
+    job = job_service.cancel_job(job_id)
+    if job:
+        return jsonify({'message': 'Job deleted successfully'}), 200
+    else:
+        return jsonify({'error': 'Job not found'}), 404
 
 
 
 
 
-
+# TODO Dillon do we need this?
 # Scripts Route
 # @job_router.route('/<script_name>', methods=['POST'])
 # def run_script(script_name):
