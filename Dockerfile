@@ -1,17 +1,20 @@
-# Build stage
-FROM python:3.10-slim as builder
-WORKDIR /app
-COPY requirements.txt .
-COPY .env /app/.env
-EXPOSE 8080
-EXPOSE 5000
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Final stage
 FROM python:3.10-slim
+
+# Set the working directory inside the container
 WORKDIR /app
-COPY --from=builder /app .
-COPY . .
-EXPOSE 8080
+
+COPY requirements.txt /app/
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt --progress-bar=on
+
+# Copy the application folder and config folder
+COPY /app /app
+COPY /config /config
+
+# Expose the required port
 EXPOSE 5000
-CMD ["python", "app.py"]
+
+# Run the Python application
+WORKDIR /
+CMD ["python", "-m", "app.app"]

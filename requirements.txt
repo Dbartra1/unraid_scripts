@@ -1,9 +1,11 @@
 requests
-dotenv
+python-dotenv
 responses
 coverage
 flask
+flask-sqlalchemy
+apscheduler
 tqdm
 crontab
-tarfile
-json
+psutil
+dependency-injector

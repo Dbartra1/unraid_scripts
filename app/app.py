@@ -1,73 +1,66 @@
 import os
-import subprocess
+
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+
+from app.extensions import db, scheduler
+from app.api import routes
+from app.models.job import Job, JobStatus
 
 load_dotenv()
 
+# Run from base directory of unraid_scripts project with python(3) -m app.app
+# Dillon which doc would you like me to put this in?
+
 # Load server IP and port number from environment variables
-SERVER_IP = os.getenv('SERVER_IP', '127.0.0.1')
+SERVER_IP = os.getenv('SERVER_IP', '0.0.0.0') #IP must be 0.0.0.0 to expose API with Docker
 PORT_NUMBER_FLASK = int(os.getenv('PORT_NUMBER_FLASK', 5000))
 
-app = Flask(__name__)
 
-@app.route("/")
-def home():
-    return render_template("index.html")
+def create_app() -> Flask:
+    app = Flask(__name__)
+    app.register_blueprint(routes.job_router_blueprint)
 
-# Scripts Route
-@app.route('/api/<script_name>', methods=['POST'])
-def run_script(script_name):
-    try:
-        scripts_folder = "./app"
-        script_path = os.path.join(scripts_folder, f"{script_name}")
+    return app
 
-        if not os.path.exists(script_path):
-            return jsonify({"error": "Script not found"}), 404
 
-        # Run the script
-        result = subprocess.run(
-            ["python", script_path],
-            capture_output=True,
-            text=True
+def configure_extensions(app: Flask):
+    # init DB
+    # persistent DB, disabled for now
+    # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    # in memory DB for development, maybe should be the default option
+    # based on how you've described your vision of the DB lifecycle
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+
+    db.init_app(app)
+    
+    with app.app_context():
+        db.create_all()
+
+    # start app scheduler
+    scheduler.start()
+
+
+def seed_test_jobs(app: Flask, db: SQLAlchemy):
+    jobs = [
+        Job(
+            id=id,
+            script_name="yada",
+            frequency="daily",
+            status=JobStatus.ACTIVE,
         )
+        for id in range(0, 10)]
+    with app.app_context():
+        db.session.add_all(jobs)
+        db.session.commit()
 
-        if result.returncode == 0:
-            return jsonify({"message": result.stdout.strip()}), 200
-        else:
-            return jsonify({"error": result.stderr.strip()}), 500
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Route to submit a cron job for a script
-@app.route('/api/<script_name>/cron', methods=['POST'])
-def submit_cron(script_name):
-    cron_expression = request.json.get("cron")
-
-    if not cron_expression:
-        return jsonify({"error": "Invalid cron expression"}), 400
-
-    try:
-        cron_job = f"{cron_expression} python {script_name}"
-        with open(f"/tmp/{script_name}_cron", "w") as f:
-            f.write(cron_job + "\n")
-        return jsonify({"message": "Cron job submitted successfully."}), 200
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-# Route to cancel a cron job for a script
-@app.route('/api/<script_name>/cron', methods=['DELETE'])
-def cancel_cron(script_name):
-    try:
-        # Example: Remove cron job file
-        cron_file = f"/tmp/{script_name}_cron"
-        if os.path.exists(cron_file):
-            os.remove(cron_file)
-            return jsonify({"message": "Cron job cancelled successfully."}), 200
-        else:
-            return jsonify({"error": "No cron job found for this script."}), 404
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
+    app = create_app()
+    configure_extensions(app)
+
+    if os.getenv("SEED_TEST_DATA", "false").lower() == "true":
+        seed_test_jobs(app, db)
+
     app.run(host=SERVER_IP, port=PORT_NUMBER_FLASK)
