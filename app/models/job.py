@@ -13,7 +13,7 @@ class JobStatus(Enum):
         return str(self.value).lower()
 
 class Job(db.Model):
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[str] = mapped_column(String(120), primary_key=True)
     script_name: Mapped[str] = mapped_column(String(120))
     frequency: Mapped[str] = mapped_column(String(120))
     status: Mapped[JobStatus] = mapped_column(insert_default=JobStatus.ACTIVE)

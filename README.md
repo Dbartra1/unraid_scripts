@@ -59,6 +59,8 @@ This repository contains a set of custom scripts designed to streamline and auto
 
 ## Usage
 
+- **Run app as container**: Scheduling and managing jobs for executing a specific script (either once or at some defined schedule) can be handled via REST API by exposed by running the application as a docker container. First run `docker build -t my-unraid-scripts .` from the root of the project followed by `docker compose up` to expose the API which can be reached at `localhost:5000`. [Endpoint documentation](docs/ENDPOINTS.md)
+
 - **Running Scripts**: Scripts can be executed manually or scheduled using the cron functionality built into the Flask UI/CLI.
 - **Customization**: Modify script parameters located in the .env file to suit your specific setup.
 - **Modularity**: This project was built with modularity in mind, trying our best to provide a customizable project structure.

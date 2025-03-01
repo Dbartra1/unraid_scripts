@@ -10,39 +10,35 @@ def list_jobs():
     jobs = job_service.get_jobs()
     return jsonify(jobs), 200 # TODO error handling
 
-@job_router_blueprint.route("/<int:job_id>", methods=["GET"])
-def list_jobs():
-    job = job_service.get_job()
+@job_router_blueprint.route("/<string:job_id>", methods=["GET", "PATCH", "DELETE"])
+def list_job(job_id):
+    job = None
+
+    if request.method == "GET":
+        job = job_service.get_job(job_id)
+    elif request.method == "PATCH":
+        data = request.json
+        frequency = data.get('frequency')
+
+        job = job_service.update_job(job_id, frequency)
+    elif request.method == "DELETE":
+        job = job_service.cancel_job(job_id)
+        if job:
+            return jsonify({'message': 'Job deleted successfully'}), 200
+        else:
+            return jsonify({'error': 'Job not found'}), 404
+
     return jsonify(job), 200 # TODO error handling
 
-@job_router_blueprint.route('/', methods=["POST", "PATCH"])
+@job_router_blueprint.route('/', methods=["POST"])
 def add_job():
     data = request.json
     script_name = data.get('script_name')
     frequency = data.get('frequency')
 
-    job = None
-    if request.method == "POST":
-        job = job_service.add_job(script_name, frequency)
-    elif request.method == "PATCH":
-        job = job_service.update_job(script_name, frequency)
-    else:
-        return jsonify("the fuck you doin?"), 400
-
+    job = job_service.add_job(script_name, frequency)
     
     return jsonify(job), 200 # TODO error handling
-
-@job_router_blueprint.route('/job/<int:job_id>', methods=['DELETE'])
-def cancel_job(job_id):
-    job = job_service.cancel_job(job_id)
-    if job:
-        return jsonify({'message': 'Job deleted successfully'}), 200
-    else:
-        return jsonify({'error': 'Job not found'}), 404
-
-
-
-
 
 # TODO Dillon do we need this?
 # Scripts Route

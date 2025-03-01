@@ -14,7 +14,7 @@ load_dotenv()
 # Dillon which doc would you like me to put this in?
 
 # Load server IP and port number from environment variables
-SERVER_IP = os.getenv('SERVER_IP', '127.0.0.1')
+SERVER_IP = os.getenv('SERVER_IP', '0.0.0.0') #IP must be 0.0.0.0 to expose API with Docker
 PORT_NUMBER_FLASK = int(os.getenv('PORT_NUMBER_FLASK', 5000))
 
 
@@ -25,7 +25,7 @@ def create_app() -> Flask:
     return app
 
 
-def configure_container(app: Flask):
+def configure_extensions(app: Flask):
     # init DB
     # persistent DB, disabled for now
     # app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
@@ -58,7 +58,7 @@ def seed_test_jobs(app: Flask, db: SQLAlchemy):
 
 if __name__ == "__main__":
     app = create_app()
-    configure_container(app)
+    configure_extensions(app)
 
     if os.getenv("SEED_TEST_DATA", "false").lower() == "true":
         seed_test_jobs(app, db)

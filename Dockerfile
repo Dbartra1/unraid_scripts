@@ -13,7 +13,8 @@ COPY /app /app
 COPY /config /config
 
 # Expose the required port
-EXPOSE 8080
+EXPOSE 5000
 
 # Run the Python application
-CMD ["python", "-u", "app.py"]
+WORKDIR /
+CMD ["python", "-m", "app.app"]

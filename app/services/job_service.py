@@ -26,35 +26,44 @@ class JobService:
                 'status': str(job.status),
             }
             for job in jobs
-        ]
+        ] # TODO proper serializations
         return jobs_serialized
 
     def get_job(self, job_id) -> Job:
+        # TODO validate input
         job = repo.get_job(job_id)
         job_serialized = {
             'id': job.id,
             'script_name': job.script_name,
             'frequency': job.frequency
-        }
+        } # TODO proper serialization
         return job_serialized
     
     def add_job(self, script_name, frequency) -> Job:
         # TODO validate inputs
 
-        job = repo.get_job()
-        if job:
-            return # TODO error handling
-        else:
+        job_serialized = {}
+        try:
+            job = repo.get_job(script_name)
+        except:
             job = Job(
+                id=script_name,
                 script_name=script_name,
                 frequency=frequency,
                 status=JobStatus.ACTIVE
             )
 
-        repo.add_job(job) # TODO error handling
-        scheduler_service.schedule(job) # TODO error handling
+            # scheduler_service.schedule(job) # TODO make this work
+            repo.add_job(job) # TODO error handling
 
-        return job
+            job_serialized = {
+                "id": script_name,
+                "script_name": script_name,
+                "frequency": frequency,
+                "status": "active"
+            } # TODO proper serialization
+
+        return job_serialized
     
     def update_job(self, job_id, new_frequency) -> Job:
         # TODO validate inputs
@@ -63,15 +72,20 @@ class JobService:
         if job:
             job.frequency = new_frequency
         
-        repo.update_job() # TODO this work?
-        scheduler_service.reschedule(job)
+        # scheduler_service.reschedule(job) # TODO make this work
+        repo.update_job()
 
-        return job
+        return {
+            "id": job_id,
+            "script_name": job_id,
+            "frequency": new_frequency,
+            "status": "active",
+        } # TODO proper serialization
     
     def cancel_job(self, job_id):
         job = repo.get_job(job_id)
         if job:
-            scheduler_service.remove(job)
+            # scheduler_service.remove(job) # TODO make this work
             repo.delete_job(job)
 
             return jsonify({'message': 'Job deleted successfully'}), 200 # TODO error handling
