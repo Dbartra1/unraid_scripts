@@ -1,16 +1,16 @@
-from flask import Blueprint, jsonify, request
+from flask import jsonify, request
 
+from app.jobs import bp
 from app.jobs import service
 
-job_router_blueprint = Blueprint('job_router', __name__, url_prefix="/job")
 service = service.JobService()
 
-@job_router_blueprint.route("/", methods=["GET"])
+@bp.route("/", methods=["GET"])
 def list_jobs():
     jobs = service.get_all()
     return jsonify(jobs), 200 # TODO error handling
 
-@job_router_blueprint.route("/<string:job_id>", methods=["GET", "PATCH", "DELETE"])
+@bp.route("/<string:job_id>", methods=["GET", "PATCH", "DELETE"])
 def list_job(job_id):
     job = None
 
@@ -30,7 +30,7 @@ def list_job(job_id):
 
     return jsonify(job), 200 # TODO error handling
 
-@job_router_blueprint.route('/', methods=["POST"])
+@bp.route('/', methods=["POST"])
 def add_job():
     data = request.json
     script_name = data.get('script_name')

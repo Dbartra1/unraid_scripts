@@ -5,7 +5,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 from app.extensions import db, scheduler
-from app.api import routes
+from app.jobs import bp as jobs_bp
 from app.models.job import Job, JobStatus
 
 load_dotenv()
@@ -20,7 +20,7 @@ PORT_NUMBER_FLASK = int(os.getenv('PORT_NUMBER_FLASK', 5000))
 
 def create_app() -> Flask:
     app = Flask(__name__)
-    app.register_blueprint(routes.job_router_blueprint)
+    app.register_blueprint(jobs_bp)
 
     return app
 
