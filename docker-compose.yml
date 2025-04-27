@@ -1,0 +1,6 @@
+services:
+  app:
+    image: my-unraid-scripts
+    ports:
+      - 5000:5000
+    network_mode: bridge
