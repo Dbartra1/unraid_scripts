@@ -2,4 +2,4 @@
 .env.local
 .env.hold
 /logs
-**/__pycache__
+__pycache__/
