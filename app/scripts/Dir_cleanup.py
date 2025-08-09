@@ -56,6 +56,7 @@ logging.basicConfig(
     level=log_level,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 def process_directory(directory, media_dirs, deleted_count, depth=0, max_depth=10):
     """Process a directory to identify media and clean non-media files."""

@@ -3,252 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Python Script Manager</title>
-    <style>
-        body {
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 0;
-            background-color: #000000;
-            color: #00ff9f;
-        }
-        header {
-            background-color: #121420;
-            color: #00b8ff;
-            padding: 1em;
-            text-align: center;
-            border-bottom: 2px solid #bd00ff;
-        }
-        main {
-            padding: 2em;
-        }
-        .script-section {
-            margin-bottom: 2em;
-            padding: 1em;
-            background: #121420;
-            border: 1px solid #bd00ff;
-            border-radius: 5px;
-        }
-        .script-header {
-            margin-bottom: 1em;
-        }
-        .script-header h2 {
-            margin: 0;
-            color: #d600ff;
-        }
-        .script-controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1em;
-            margin-bottom: 1em;
-        }
-        .script-controls input[type="text"] {
-            flex: 1;
-            padding: 0.5em;
-            border: 1px solid #3f475f;
-            border-radius: 3px;
-            background-color: #1a1e2e;
-            color: #00b8ff;
-        }
-        button {
-            background-color: #00ff9f;
-            color: #000000;
-            border: none;
-            padding: 0.5em 1em;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #00b8ff;
-        }
-        .output {
-            background: #000000;
-            padding: 1em;
-            margin-top: 1em;
-            border-radius: 5px;
-            border: 1px solid #bd00ff;
-            color: #00ff9f;
-            font-family: 'Courier New', Courier, monospace;
-            white-space: pre-wrap;
-            height: 150px;
-            overflow-y: auto;
-        }
-    </style>
+    <title>Unraid Scripts Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <h1>Python Script Manager</h1>
-    </header>
-    <main>
-        <div class="script-section">
-            <div class="script-header">
-                <h2>File Sync
-                    <span class="tooltip" title="This script performs example tasks.">❓</span> 
-                </h2>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1><i class="fas fa-server"></i> Unraid Scripts Manager</h1>
+                <p class="subtitle">Advanced job scheduling and script management</p>
             </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
-            </div>
-            <div class="output">
-                Output will appear here...
-            </div>
-        </div>
+        </header>
 
-        <div class="script-section">
-            <div class="script-header">
-                <h2>API Tests
-                    <span class="tooltip" title="This script performs example tasks.">❓</span>
-                </h2>
-            </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
-            </div>
-            <div class="output">
-                Output will appear here...
-            </div>
-        </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Overview -->
+            <section class="dashboard">
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <div class="card-icon active">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 id="active-jobs-count">0</h3>
+                            <p>Active Jobs</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-icon scheduled">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 id="scheduled-jobs-count">0</h3>
+                            <p>Scheduled Jobs</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-icon completed">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 id="completed-jobs-count">0</h3>
+                            <p>Completed Jobs</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <div class="card-icon failed">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 id="failed-jobs-count">0</h3>
+                            <p>Failed Jobs</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <div class="script-section">
-            <div class="script-header">
-                <h2>Plex Power On Redfish
-                    <span class="tooltip" title="This script performs example tasks.">❓</span>
-                </h2>
-            </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
-            </div>
-            <div class="output">
-                Output will appear here...
-            </div>
-        </div>
+            <!-- Job Management Section -->
+            <section class="job-management">
+                <div class="section-header">
+                    <h2><i class="fas fa-tasks"></i> Job Management</h2>
+                    <button class="btn btn-primary" onclick="openAddJobModal()">
+                        <i class="fas fa-plus"></i> Add New Job
+                    </button>
+                </div>
 
-        <div class="script-section">
-            <div class="script-header">
-                <h2>Plex Power Off Redfish
-                    <span class="tooltip" title="This script performs example tasks.">❓</span>
-                </h2>
-            </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
-            </div>
-            <div class="output">
-                Output will appear here...
-            </div>
-        </div>
+                <!-- Job Filters -->
+                <div class="job-filters">
+                    <div class="filter-group">
+                        <label for="status-filter">Status:</label>
+                        <select id="status-filter" onchange="filterJobs()">
+                            <option value="">All Statuses</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="running">Running</option>
+                            <option value="completed">Completed</option>
+                            <option value="failed">Failed</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="frequency-filter">Frequency:</label>
+                        <select id="frequency-filter" onchange="filterJobs()">
+                            <option value="">All Frequencies</option>
+                            <option value="hourly">Hourly</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="custom">Custom Cron</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <input type="text" id="search-filter" placeholder="Search jobs..." onkeyup="filterJobs()">
+                    </div>
+                </div>
 
-        <div class="script-section">
-            <div class="script-header">
-                <h2>WOL Power on/off
-                    <span class="tooltip" title="This script performs example tasks.">❓</span>
-                </h2>
-            </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
-            </div>
-            <div class="output">
-                Output will appear here...
-            </div>
-        </div>
+                <!-- Jobs Table -->
+                <div class="jobs-table-container">
+                    <table class="jobs-table" id="jobs-table">
+                        <thead>
+                            <tr>
+                                <th>Script Name</th>
+                                <th>Frequency</th>
+                                <th>Status</th>
+                                <th>Last Run</th>
+                                <th>Next Run</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="jobs-table-body">
+                            <!-- Jobs will be populated here -->
+                        </tbody>
+                    </table>
+                    <div id="no-jobs-message" class="no-jobs-message" style="display: none;">
+                        <i class="fas fa-inbox"></i>
+                        <p>No jobs found. Create your first job to get started!</p>
+                    </div>
+                </div>
+            </section>
 
-        <div class="script-section">
-            <div class="script-header">
-                <h2>Overseer Watchlist Sync
-                    <span class="tooltip" title="This script performs example tasks.">❓</span>
-                </h2>
-            </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
-            </div>
-            <div class="output">
-                Output will appear here...
-            </div>
-        </div>
+            <!-- Scheduler Status -->
+            <section class="scheduler-status">
+                <div class="section-header">
+                    <h2><i class="fas fa-cogs"></i> Scheduler Status</h2>
+                    <button class="btn btn-secondary" onclick="refreshSchedulerStatus()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">Scheduler Status:</span>
+                        <span class="status-value" id="scheduler-running-status">Unknown</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Running Jobs:</span>
+                        <span class="status-value" id="running-jobs-count">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Total Jobs:</span>
+                        <span class="status-value" id="total-jobs-count">0</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 
-        <div class="script-section">
-            <div class="script-header">
-                <h2>Stall Handler
-                    <span class="tooltip" title="This script performs example tasks.">❓</span>
-                </h2>
+    <!-- Add/Edit Job Modal -->
+    <div id="job-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Job</h3>
+                <span class="close" onclick="closeJobModal()">&times;</span>
             </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
-            </div>
-            <div class="output">
-                Output will appear here...
-            </div>
+            <form id="job-form" onsubmit="submitJob(event)">
+                <div class="form-group">
+                    <label for="script-name">Script Name:</label>
+                    <input type="text" id="script-name" name="script-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="frequency">Frequency:</label>
+                    <select id="frequency" name="frequency" required onchange="toggleCustomCron()">
+                        <option value="hourly">Hourly</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="custom">Custom Cron</option>
+                    </select>
+                </div>
+                <div class="form-group" id="custom-cron-group" style="display: none;">
+                    <label for="custom-cron">Custom Cron Expression:</label>
+                    <input type="text" id="custom-cron" name="custom-cron" placeholder="* * * * *">
+                    <small>Format: minute hour day month weekday</small>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description (Optional):</label>
+                    <textarea id="description" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeJobModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Job</button>
+                </div>
+            </form>
         </div>
+    </div>
 
-        <div class="script-section">
-            <div class="script-header">
-                <h2>Data Sanitization
-                    <span class="tooltip" title="This script performs example tasks.">❓</span>
-                </h2>
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Action</h3>
+                <span class="close" onclick="closeConfirmModal()">&times;</span>
             </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
+            <div class="modal-body">
+                <p id="confirm-message">Are you sure you want to perform this action?</p>
             </div>
-            <div class="output">
-                Output will appear here...
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeConfirmModal()">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirm-action-btn">Confirm</button>
             </div>
         </div>
+    </div>
 
-        <div class="script-section">
-            <div class="script-header">
-                <h2>Log Clear
-                    <span class="tooltip" title="This script performs example tasks.">❓</span>
-                </h2>
-            </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
-            </div>
-            <div class="output">
-                Output will appear here...
-            </div>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading...</p>
         </div>
+    </div>
 
-        <div class="script-section">
-            <div class="script-header">
-                <h2>File Sync with Power on/off
-                    <span class="tooltip" title="This script performs example tasks.">❓</span>
-                </h2>
-            </div>
-            <div class="script-controls">
-                <input type="text" placeholder="Enter Cron Job (e.g., 0 5 * * *)">
-                <button>Submit Cron</button>
-                <button>Cancel Cron</button>
-                <button>Run Script</button>
-            </div>
-            <div class="output">
-                Output will appear here...
-            </div>
-        </div>
-    </main>
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

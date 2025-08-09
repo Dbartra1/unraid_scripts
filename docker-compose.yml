@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: unraid-scripts-app
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=app.app
+      - FLASK_ENV=production
+      - SERVER_IP=0.0.0.0
+      - PORT_NUMBER_FLASK=5000
+      - SEED_TEST_DATA=true
+    volumes:
+      - ./config:/app/config:ro
+      - ./app/scripts:/app/app/scripts:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/jobs/scheduler/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - unraid-scripts-network
+
+networks:
+  unraid-scripts-network:
+    driver: bridge
