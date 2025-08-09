@@ -9,3 +9,4 @@ tqdm
 crontab
 psutil
 dependency-injector
+werkzeug
